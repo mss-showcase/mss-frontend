@@ -1,0 +1,13 @@
+{
+  "name": "@mss-frontend/store",
+  "version": "0.1.0",
+  "main": "index.ts",
+  "private": true,
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.1.0",
+    "react-redux": "^9.0.0"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0"
+  }
+}

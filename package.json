@@ -1,0 +1,16 @@
+{
+  "name": "mss-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "echo nothing to build at root",
+    "start": "echo start an individual app"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "extends": "../../packages/config/tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-native",
+    "types": ["expo"],
+    "baseUrl": "."
+  },
+  "include": ["**/*.ts", "**/*.tsx"]
+}

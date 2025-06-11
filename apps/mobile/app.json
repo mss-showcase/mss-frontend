@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "MSS Mobile",
+    "slug": "mss-mobile",
+    "version": "1.0.0",
+    "sdkVersion": "51.0.0",
+    "platforms": ["ios", "android"],
+    "jsEngine": "hermes"
+  }
+}
