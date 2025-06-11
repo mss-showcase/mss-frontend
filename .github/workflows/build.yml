@@ -45,8 +45,8 @@ jobs:
     name: Trigger Expo EAS Build (Android)
     runs-on: ubuntu-latest
     env:
-      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}  # szükséges a privát EAS buildhez
-
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -68,8 +68,43 @@ jobs:
       - name: Install Expo CLI and EAS CLI
         run: |
           pnpm add -g expo-cli eas-cli
+          sudo apt-get update && sudo apt-get install -y jq  # telepítjük a jq-t a JSON kezeléshez
 
-      - name: Trigger EAS Build (Android)
+      - name: Trigger EAS Build (Android) without waiting
         working-directory: apps/mobile
-        run: pnpm exec eas build --platform android --non-interactive --profile production
+        id: trigger-build
+        run: |
+          build_info=$(pnpm exec eas build --platform android --non-interactive --profile production --wait false --json)
+          echo "build_info=$build_info" >> $GITHUB_OUTPUT
+
+      - name: Wait for EAS build to finish
+        working-directory: apps/mobile
+        run: |
+          BUILD_ID=$(echo "${{ steps.trigger-build.outputs.build_info }}" | jq -r '.id')
+          echo "Waiting for build ID: $BUILD_ID"
+          
+          STATUS=""
+          TIMEOUT=1800   # 30 perc timeout másodpercben
+          INTERVAL=15    # polling interval másodpercben
+          ELAPSED=0
+
+          while [ "$STATUS" != "finished" ] && [ "$STATUS" != "errored" ] && [ "$ELAPSED" -lt "$TIMEOUT" ]; do
+            STATUS=$(pnpm exec eas build:view --id $BUILD_ID --json | jq -r '.status')
+            echo "Build status: $STATUS"
+            if [ "$STATUS" = "finished" ]; then
+              echo "Build finished successfully."
+              exit 0
+            elif [ "$STATUS" = "errored" ]; then
+              echo "Build errored."
+              exit 1
+            fi
+            sleep $INTERVAL
+            ELAPSED=$((ELAPSED + INTERVAL))
+          done
+          
+          if [ "$STATUS" != "finished" ]; then
+            echo "Build did not finish within timeout."
+            exit 1
+          fi
+
 
