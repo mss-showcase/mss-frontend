@@ -1,9 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
 import userReducer from './userSlice';
+import stockNamesReducer from './stockNamesSlice';
+import TickReducer from './tickSlice';
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
+    stockNames: stockNamesReducer,
+    ticks: TickReducer
   },
 });
 
