@@ -50,6 +50,15 @@ pnpm --filter @mss-frontend/mobile exec eas build --platform android
 pnpm --filter @mss-frontend/mobile exec eas build --platform ios
 ```
 
+Or, for EAS Build, you can use the
+
+```
+# you must go to the mobile app folder first!
+cd apps/mobile
+eas build --platform android
+```
+command, but you must pay attention of the current work directory!
+
 # Expo Application Services (EAS) CLI setup on windows
 
 What is EAS? : Expo Application Services: A build and submission service for mobile app developers that handles cloud-based app building and deployment. 
