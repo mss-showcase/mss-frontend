@@ -10,23 +10,40 @@ env:
   EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
 jobs:
-  build-web:
-    name: Build Vite Web App
+  check-diff:
+    name: Check which app changed
     runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.message, '[force-web]') ||
-      steps.filter.outputs.web_changed == 'true'
-
+    outputs:
+      web_changed: ${{ steps.set.outputs.web_changed }}
+      android_changed: ${{ steps.set.outputs.android_changed }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Detect changes in web app
-        id: filter
+      - name: Check changed files
+        id: set
         run: |
-          echo "web_changed=false" >> "$GITHUB_OUTPUT"
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^apps/web/' && echo "web_changed=true" >> "$GITHUB_OUTPUT" || true
+          WEB_CHANGED=false
+          ANDROID_CHANGED=false
+          
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^apps/web/' && WEB_CHANGED=true
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^apps/mobile/' && ANDROID_CHANGED=true
+
+          echo "web_changed=$WEB_CHANGED" >> $GITHUB_OUTPUT
+          echo "android_changed=$ANDROID_CHANGED" >> $GITHUB_OUTPUT
+
+  build-web:
+    name: Build Vite Web App
+    needs: check-diff
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.head_commit.message, '[force-web]') ||
+      needs.check-diff.outputs.web_changed == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -53,21 +70,18 @@ jobs:
 
   build-android:
     name: Trigger Expo EAS Build (Android)
-    runs-on: ubuntu-latest
+    needs: check-diff
     if: |
       github.event_name == 'workflow_dispatch' ||
       contains(github.event.head_commit.message, '[force-android]') ||
-      steps.filter.outputs.android_changed == 'true'
+      needs.check-diff.outputs.android_changed == 'true'
+    runs-on: ubuntu-latest
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
-      - name: Detect changes in mobile app
-        id: filter
-        run: |
-          echo "android_changed=false" >> "$GITHUB_OUTPUT"
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^apps/mobile/' && echo "android_changed=true" >> "$GITHUB_OUTPUT" || true
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
