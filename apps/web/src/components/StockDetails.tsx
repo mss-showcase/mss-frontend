@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { RootState, AppDispatch } from '@mss-frontend/store';
 import { fetchTicks } from '@mss-frontend/store/tickSlice';
 import { TickWindow } from '@mss-frontend/store/tickSlice';
+import CandlestickChart from '@mss-frontend/ui/CandlestickChart';
+import type { CandlestickData } from 'lightweight-charts';
 
 const StockDetails = () => {
   const { stockName } = useParams<{ stockName: string }>();
@@ -40,18 +42,19 @@ const StockDetails = () => {
         <div>
           {/* Replace this with your chart component */}
           <pre style={{ background: '#f4f4f4', padding: 12, borderRadius: 6, overflowX: 'auto' }}>
-            {JSON.stringify(data.ticks.slice(0, 5), null, 2)} {/* Show first 5 ticks as preview */}
+          <CandlestickChart
+            data={data.ticks.map(tick => ({
+              time: Math.floor(new Date(tick.timestamp).getTime() / 1000),
+              open: tick.open,
+              high: tick.high,
+              low: tick.low,
+              close: tick.close,
+            })) as CandlestickData[]}/>
           </pre>
         </div>
       )}
       {data && data.ticks && data.ticks.length === 0 && (
-        <div className="no-tick-warning">
-          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="12" fill="#ffeeba"/>
-            <path d="M12 7v5m0 4h.01" stroke="#856404" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-          No tick data available for this stock and window.
-        </div>
+        <div>No tick data available for this stock and window.</div>
       )}
     </div>
   );
