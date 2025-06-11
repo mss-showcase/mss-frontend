@@ -8,7 +8,7 @@ export default function App() {
     <Provider store={store}>
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <Text>Hello from Expo App</Text>
-        <Button title="Click me" onPress={() => alert('Pressed!')} />
+        <Button label="Click me" onPress={() => alert('Pressed!')} />
       </View>
     </Provider>
   );

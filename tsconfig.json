@@ -1,0 +1,12 @@
+{
+  "extends": "./packages/config/tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@mss-frontend/ui": ["packages/ui"],
+      "@mss-frontend/store": ["packages/store"]
+    },
+    "types": ["react"]
+  },
+  "include": ["apps", "packages"]
+}
