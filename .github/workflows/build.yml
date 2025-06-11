@@ -13,16 +13,26 @@ jobs:
   build-web:
     name: Build Vite Web App
     runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.head_commit.message, '[force-web]') ||
+      steps.filter.outputs.web_changed == 'true'
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Detect changes in web app
+        id: filter
+        run: |
+          echo "web_changed=false" >> "$GITHUB_OUTPUT"
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^apps/web/' && echo "web_changed=true" >> "$GITHUB_OUTPUT" || true
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8.15.5
-          
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -39,23 +49,31 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: web-build
-          path: apps/web/dist  # vagy ahová a Vite build ír
+          path: apps/web/dist
 
   build-android:
     name: Trigger Expo EAS Build (Android)
     runs-on: ubuntu-latest
-    env:
-      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-      
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.head_commit.message, '[force-android]') ||
+      steps.filter.outputs.android_changed == 'true'
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+
+      - name: Detect changes in mobile app
+        id: filter
+        run: |
+          echo "android_changed=false" >> "$GITHUB_OUTPUT"
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^apps/mobile/' && echo "android_changed=true" >> "$GITHUB_OUTPUT" || true
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8.15.5
-          
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -68,43 +86,9 @@ jobs:
       - name: Install Expo CLI and EAS CLI
         run: |
           pnpm add -g expo-cli eas-cli
-          sudo apt-get update && sudo apt-get install -y jq  # telepítjük a jq-t a JSON kezeléshez
+          sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Trigger EAS Build (Android) without waiting
+      - name: Trigger EAS Build (Android)
         working-directory: apps/mobile
-        id: trigger-build
-        run: |
-          build_info=$(pnpm exec eas build --platform android --non-interactive --profile production --wait false --json)
-          echo "build_info=$build_info" >> $GITHUB_OUTPUT
-
-      - name: Wait for EAS build to finish
-        working-directory: apps/mobile
-        run: |
-          BUILD_ID=$(echo "${{ steps.trigger-build.outputs.build_info }}" | jq -r '.id')
-          echo "Waiting for build ID: $BUILD_ID"
-          
-          STATUS=""
-          TIMEOUT=1800   # 30 perc timeout másodpercben
-          INTERVAL=15    # polling interval másodpercben
-          ELAPSED=0
-
-          while [ "$STATUS" != "finished" ] && [ "$STATUS" != "errored" ] && [ "$ELAPSED" -lt "$TIMEOUT" ]; do
-            STATUS=$(pnpm exec eas build:view --id $BUILD_ID --json | jq -r '.status')
-            echo "Build status: $STATUS"
-            if [ "$STATUS" = "finished" ]; then
-              echo "Build finished successfully."
-              exit 0
-            elif [ "$STATUS" = "errored" ]; then
-              echo "Build errored."
-              exit 1
-            fi
-            sleep $INTERVAL
-            ELAPSED=$((ELAPSED + INTERVAL))
-          done
-          
-          if [ "$STATUS" != "finished" ]; then
-            echo "Build did not finish within timeout."
-            exit 1
-          fi
-
-
+        run: pnpm exec eas build --platform android --non-interactive --profile production
+        timeout-minutes: 45
