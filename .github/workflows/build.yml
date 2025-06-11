@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
 jobs:
   build-web:
     name: Build Vite Web App
@@ -67,4 +70,6 @@ jobs:
           pnpm add -g expo-cli eas-cli
 
       - name: Trigger EAS Build (Android)
-        run: pnpm --filter @mss-frontend/mobile exec eas build --platform android --non-interactive --profile production
+        working-directory: apps/mobile
+        run: pnpm exec eas build --platform android --non-interactive --profile production
+
