@@ -27,9 +27,20 @@ jobs:
         run: |
           WEB_CHANGED=false
           ANDROID_CHANGED=false
-          
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^apps/web/' && WEB_CHANGED=true
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^apps/mobile/' && ANDROID_CHANGED=true
+
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+
+          # Ellenőrzés
+          echo "$CHANGED_FILES" | grep '^apps/web/' && WEB_CHANGED=true || true
+          echo "$CHANGED_FILES" | grep '^apps/mobile/' && ANDROID_CHANGED=true || true
+
+          # Common folder
+          echo "$CHANGED_FILES" | grep -E '^(packages/)' && WEB_CHANGED=true ANDROID_CHANGED=true || true
+          # Common files
+          echo "$CHANGED_FILES" | grep -E '^[^/]+\.(json|ya?ml)$' && {
+            WEB_CHANGED=true
+            ANDROID_CHANGED=true
+          } || true
 
           echo "web_changed=$WEB_CHANGED" >> $GITHUB_OUTPUT
           echo "android_changed=$ANDROID_CHANGED" >> $GITHUB_OUTPUT

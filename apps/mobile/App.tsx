@@ -7,7 +7,7 @@ export default function App() {
   return (
     <Provider store={store}>
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Hello from Expo App</Text>
+        <Text>Hello from mss-showcase App</Text>
         <Button label="Click me" onPress={() => alert('Pressed!')} />
       </View>
     </Provider>
