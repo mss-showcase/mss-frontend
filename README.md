@@ -11,6 +11,12 @@ For the build I am using pnpm.
 
 # build
 
+The build is conditionally here to save some resources at EXPO server.
+
+ * in case of apps/mobile -> only the android build runs
+ * in case of apps/web -> only the web build runs
+ * in case of packages/ and key files (./*.json and ./*.yml and ./*.yaml) -> both build run
+
 ## Web App
 
 From the monorepo root, run:
