@@ -8,9 +8,10 @@ const AppMenu = () => {
   return (
     <nav className="app-menu">
       <button
-        className="hamburger"
+        className={`hamburger${open ? ' open' : ''}`}
         onClick={() => setOpen((prev) => !prev)}
         aria-label="Toggle menu"
+        aria-expanded={open}
       >
         <span className="bar" />
         <span className="bar" />

@@ -60,6 +60,7 @@ a:hover {
   position: relative;
 }
 
+/* Hamburger animation */
 .hamburger {
   display: flex;
   flex-direction: column;
@@ -71,6 +72,8 @@ a:hover {
   cursor: pointer;
   padding: 0;
   margin: 8px;
+  z-index: 20;
+  transition: 0.3s;
 }
 
 .hamburger .bar {
@@ -80,8 +83,21 @@ a:hover {
   margin: 4px 0;
   border-radius: 2px;
   transition: 0.3s;
+  position: relative;
 }
 
+/* Animated state for hamburger menu */
+.hamburger.open .bar:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+.hamburger.open .bar:nth-child(2) {
+  opacity: 0;
+}
+.hamburger.open .bar:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* Nicer menu-list popup */
 .menu-list {
   display: none;
   flex-direction: column;
@@ -89,10 +105,18 @@ a:hover {
   top: 48px;
   left: 0;
   background: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  padding: 8px 0;
-  min-width: 120px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  padding: 12px 0;
+  min-width: 160px;
   z-index: 10;
+  border-radius: 10px;
+  animation: menuFadeIn 0.25s ease;
+  border: 1px solid #e0e7ff;
+}
+
+@keyframes menuFadeIn {
+  from { opacity: 0; transform: translateY(-10px);}
+  to { opacity: 1; transform: translateY(0);}
 }
 
 .menu-list.open {
@@ -102,13 +126,22 @@ a:hover {
 .menu-list li {
   list-style: none;
   margin: 0;
-  padding: 8px 16px;
+  padding: 0;
 }
 
 .menu-list li a {
   text-decoration: none;
   color: #333;
   display: block;
+  padding: 12px 24px;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+  font-size: 1.05rem;
+}
+
+.menu-list li a:hover {
+  background: #e0e7ff;
+  color: #007bff;
 }
 
 .app-header {
