@@ -1,14 +1,14 @@
 import { Routes, Route } from 'react-router-dom';
 import Welcome from './Welcome';
 import About from './About';
-import StockDetails from './StockDetails'; // <-- create this component
+import StockDetails from './StockDetails';
 
-const NavigationExample = () => (
+const Navigation = () => (
   <Routes>
     <Route path="/" element={<Welcome />} />
     <Route path="/about" element={<About />} />
-    <Route path="/stock/:stockName" element={<StockDetails />} /> {/* Hidden route */}
+    <Route path="/stock/:stockName" element={<StockDetails />} />
   </Routes>
 );
 
-export default NavigationExample;
+export default Navigation;

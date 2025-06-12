@@ -1,6 +1,5 @@
 import AppMenu from './components/AppMenu';
-import Welcome from './components/Welcome';
-import NavigationExample from './components/NavigationExample';
+import Navigation from './components/Navigation';
 import './theme/theme.css';
 
 const App = () => {
@@ -11,7 +10,7 @@ const App = () => {
       </header>
       <AppMenu />
       <main className="app-content">
-        <NavigationExample />
+        <Navigation />
       </main>
       <footer className="app-footer">
         &copy; {new Date().getFullYear()} MSS Showcase. All rights reserved.
