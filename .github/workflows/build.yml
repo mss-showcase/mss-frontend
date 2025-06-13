@@ -104,7 +104,6 @@ jobs:
           path: apps/web/dist
 
       - name: Upload (sync) frontend to shared S3 bucket
-        working-directory: apps/mobile
         run: aws s3 sync apps/web/dist s3://$WEBHOSTING_BUCKET/ --delete --region $AWS_REGION
 
   build-android:
