@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Routes, Route } from 'react-router-dom';
 import '../theme/theme.css';
+import MobileAppInfo from './MobileAppInfo';
 
 const AppMenu = () => {
   const [open, setOpen] = useState(false);
@@ -23,6 +24,9 @@ const AppMenu = () => {
         <li><Link to="/weather" onClick={() => setOpen(false)}>Weather</Link></li>
         <li><Link to="/about" onClick={() => setOpen(false)}>About</Link></li>
       </ul>
+      <Routes>
+        <Route path="/mobile" element={<MobileAppInfo />} />
+      </Routes>
     </nav>
   );
 };

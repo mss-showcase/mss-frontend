@@ -4,6 +4,7 @@ import About from './About';
 import StockDetails from './StockDetails';
 import { RSSFeedReader } from './RSSFeedReader';
 import WeatherFeedReader from './WeatherFeedReader';
+import MobileAppInfo from './MobileAppInfo';
 
 const Navigation = () => (
   <Routes>
@@ -12,6 +13,7 @@ const Navigation = () => (
     <Route path="/stock/:stockName" element={<StockDetails />} />
     <Route path="/news" element={<RSSFeedReader />} />
     <Route path="/weather" element={<WeatherFeedReader />} />
+    <Route path="/mobile" element={<MobileAppInfo />} />
   </Routes>
 );
 

@@ -3,6 +3,17 @@ React Native (web+android) frontend monorepo with Expo
 
 The project is using Vite and Redux.
 
+# give it a try!
+
+You can try this webapp in AWS **until approximately 2026.06.01**, or until AWS starts charging for hosting—whichever comes first.
+
+http://mss-webhosting-bucket.s3-website.eu-north-1.amazonaws.com/
+
+This is its React-Native mobile app version:
+
+http://mss-webhosting-bucket.s3-website.eu-north-1.amazonaws.com/mss-app-release.apk
+
+
 ## Required pnpm version
 
 For the build I am using pnpm.
