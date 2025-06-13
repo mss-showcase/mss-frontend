@@ -10,8 +10,11 @@
   "dependencies": {
     "@mss-frontend/store": "workspace:*",
     "@mss-frontend/ui": "workspace:*",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "@react-native-picker/picker": "2.7.5",
+    "@types/react": "19.1.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-native": "0.80.0",
     "react-redux": "^9.0.0"
   },
   "devDependencies": {
