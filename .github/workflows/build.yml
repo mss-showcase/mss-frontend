@@ -29,7 +29,8 @@ jobs:
         with:
           fetch-depth: 0  # important for comparing commits
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
@@ -102,6 +103,12 @@ jobs:
         with:
           name: web-build
           path: apps/web/dist
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Upload (sync) frontend to shared S3 bucket
         run: aws s3 sync apps/web/dist s3://$WEBHOSTING_BUCKET/ --delete --region $AWS_REGION
@@ -179,6 +186,12 @@ jobs:
         working-directory: apps/mobile
         run: |
           curl -L "${{ steps.wait_apk.outputs.apk_url }}" -o mss-app-release.apk
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Upload APK to S3
         run: aws s3 cp mss-app-release.apk s3://$WEBHOSTING_BUCKET/mss-app-release.apk --region $AWS_REGION
