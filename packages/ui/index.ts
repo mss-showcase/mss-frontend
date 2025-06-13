@@ -1,1 +1,2 @@
-export { Button } from './Button';
+export { WindowSelector } from './WindowSelector';
+export { ChartSection } from './ChartSection';
