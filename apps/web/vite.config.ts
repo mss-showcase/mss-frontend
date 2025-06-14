@@ -6,7 +6,6 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      'react-native': 'react-native-web',
       '@mss-frontend/ui': path.resolve(__dirname, '../../packages/ui'),
       '@mss-frontend/store': path.resolve(__dirname, '../../packages/store'),
     },

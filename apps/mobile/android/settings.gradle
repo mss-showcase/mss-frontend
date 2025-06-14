@@ -1,5 +1,0 @@
-rootProject.name = 'mss-mobile'
-
-include ':app'
-
-apply from: new File(["node", "-e", "require('path').join(require.resolve('react-native/package.json'), '../react.gradle')"].execute(null, rootDir).text.trim())

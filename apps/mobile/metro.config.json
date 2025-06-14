@@ -1,6 +1,0 @@
-{
-  "resolver": {
-	"nodeModulesPaths": ["../../node_modules"],
-	"symlinks": false
-  }
-}

@@ -1,10 +1,9 @@
-name: Build Web and Expo Mobile App
+name: Build and Deploy Web App
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -13,68 +12,11 @@ permissions:
 
 env:
   AWS_REGION: ${{ vars.AWS_REGION }}
-  WEBHOSTING_BUCKET: ${{ vars.WEBHOSTING_BUCKET }}  
-  EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+  WEBHOSTING_BUCKET: ${{ vars.WEBHOSTING_BUCKET }}
 
 jobs:
-  check-diff:
-    name: Check which app changed
-    runs-on: ubuntu-latest
-    outputs:
-      web_changed: ${{ steps.set.outputs.web_changed }}
-      android_changed: ${{ steps.set.outputs.android_changed }}
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # important for comparing commits
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Check changed files and APK presence
-        id: set
-        env:
-          AWS_REGION: ${{ env.AWS_REGION }}
-          WEBHOSTING_BUCKET: ${{ env.WEBHOSTING_BUCKET }}
-        run: |
-          WEB_CHANGED=false
-          ANDROID_CHANGED=false
-
-          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
-
-          # Check for web changes
-          echo "$CHANGED_FILES" | grep '^apps/web/' && WEB_CHANGED=true || true
-          # Check for android changes
-          echo "$CHANGED_FILES" | grep '^apps/mobile/' && ANDROID_CHANGED=true || true
-
-          # Common folder
-          echo "$CHANGED_FILES" | grep -E '^(packages/)' && WEB_CHANGED=true ANDROID_CHANGED=true || true
-          # Common files
-          echo "$CHANGED_FILES" | grep -E '^[^/]+\.(json|ya?ml)$' && {
-            WEB_CHANGED=true
-            ANDROID_CHANGED=true
-          } || true
-
-          # Check if APK is missing in S3
-          if ! aws s3 ls "s3://$WEBHOSTING_BUCKET/mss-app-release.apk" --region $AWS_REGION 2>&1 | grep -q 'mss-app-release.apk'; then
-            echo "APK is missing in S3, will trigger android build."
-            ANDROID_CHANGED=true
-          fi
-
-          echo "web_changed=$WEB_CHANGED" >> $GITHUB_OUTPUT
-          echo "android_changed=$ANDROID_CHANGED" >> $GITHUB_OUTPUT
-
   build-web:
-    name: Build Vite Web App
-    needs: check-diff
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.message, '[force-web]') ||
-      needs.check-diff.outputs.web_changed == 'true'
+    name: Build and Deploy Vite Web App
     runs-on: ubuntu-latest
 
     steps:
@@ -98,12 +40,6 @@ jobs:
       - name: Build Web
         run: pnpm --filter @mss-frontend/web build
 
-      - name: Upload Web Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: web-build
-          path: apps/web/dist
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -112,86 +48,3 @@ jobs:
 
       - name: Upload (sync) frontend to shared S3 bucket
         run: aws s3 sync apps/web/dist s3://$WEBHOSTING_BUCKET/ --delete --region $AWS_REGION
-
-  build-android:
-    name: Trigger Expo EAS Build (Android)
-    needs: check-diff
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.message, '[force-android]') ||
-      needs.check-diff.outputs.android_changed == 'true'
-    runs-on: ubuntu-latest
-    env:
-      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8.15.5
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Install Expo CLI and EAS CLI
-        run: |
-          pnpm add -g expo-cli eas-cli
-          sudo apt-get update && sudo apt-get install -y jq
-
-      - name: Trigger EAS Build (Android)
-        id: eas_build      
-        working-directory: apps/mobile
-        timeout-minutes: 45
-        run: | 
-          pnpm exec eas build --platform android --non-interactive --profile production --json > build-result.json
-          cat build-result.json
-          echo "build_id=$(jq -r '.[0].id' build-result.json)" >> $GITHUB_OUTPUT
-        
-
-      - name: Wait for EAS build to complete and get APK URL
-        id: wait_apk
-        working-directory: apps/mobile
-        run: |
-          BUILD_ID=${{ steps.eas_build.outputs.build_id }}
-          echo "Waiting for EAS build $BUILD_ID to complete..."
-          for i in {1..60}; do
-            STATUS=$(pnpm exec eas build:view $BUILD_ID --json | jq -r '.status')
-            echo "Current status: $STATUS"
-            if [ "$STATUS" = "finished" ]; then
-              BREAK=1
-              break
-            elif [ "$STATUS" = "errored" ] || [ "$STATUS" = "canceled" ]; then
-              echo "Build failed or canceled."
-              exit 1
-            fi
-            sleep 20
-          done
-          if [ "$BREAK" != "1" ]; then
-            echo "Timeout waiting for build to finish."
-            exit 1
-          fi
-          APK_URL=$(pnpm exec eas build:view $BUILD_ID --json | jq -r '.artifacts.applicationUrl')
-          echo "apk_url=$APK_URL" >> $GITHUB_OUTPUT
-
-      - name: Download APK
-        working-directory: apps/mobile
-        run: |
-          curl -L "${{ steps.wait_apk.outputs.apk_url }}" -o mss-app-release.apk
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Upload APK to S3
-        run: aws s3 cp mss-app-release.apk s3://$WEBHOSTING_BUCKET/mss-app-release.apk --region $AWS_REGION
