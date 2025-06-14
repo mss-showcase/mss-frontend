@@ -7,12 +7,9 @@ type Props = {
 };
 
 export const WindowSelector: React.FC<Props> = ({ value, onChange }) => (
-  <label>
-    Select window:&nbsp;
     <select value={value} onChange={e => onChange(e.target.value as TickWindow)}>
       {Object.values(TickWindow).map(w => (
         <option key={w} value={w}>{w}</option>
       ))}
     </select>
-  </label>
 );

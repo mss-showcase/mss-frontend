@@ -40,16 +40,23 @@ const initialState: TickState = {
 interface FetchTicksParams {
   stockName: string;
   window?: TickWindow;
+  date?: string; 
 }
 
 export const fetchTicks = createAsyncThunk<TickResponse, FetchTicksParams>(
   'ticks/fetchTicks',
-  async ({ stockName, window }) => {
+  async ({ stockName, window, date }) => {
     await loadConfig();
     const baseUrl = getGatewayUrl();
     let url = `${baseUrl}/ticks/${encodeURIComponent(stockName)}`;
     if (window) {
       url += `?window=${window}`;
+    }
+    if(window && date){
+      url += `&date=${date}`;
+    }
+    if(!window && date){
+      url += `?date=${date}`; 
     }
     const response = await fetch(url);
     if (!response.ok) throw new Error('Failed to fetch ticks');

@@ -196,6 +196,24 @@ a:hover {
   background: #e0e7ff;
 }
 
+.welcome-container input[type="date"] {
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: 1px solid #007bff;
+  background: #f4f8ff;
+  color: #22223b;
+  font-size: 1rem;
+  margin-top: 12px;
+  box-shadow: 0 2px 8px rgba(0,123,255,0.07);
+  transition: border-color 0.2s;
+  outline: none;
+}
+
+.welcome-container input[type="date"]:focus {
+  border-color: #0056b3;
+  background: #e0e7ff;
+}
+
 .no-tick-warning {
   background: #fff3cd;
   color: #856404;
