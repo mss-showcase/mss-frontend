@@ -22,14 +22,12 @@ const StockDetails = () => {
   const navigate = useNavigate();
   const { items: stockNames, loading: stocksLoading, error: stocksError } = useSelector((state: RootState) => state.stockNames);
   const [window, setWindow] = useState<TickWindow>(TickWindow.Month);
+
+  // Form state
   const [selectedStock, setSelectedStock] = useState(paramStockName || '');
   const [inputDate, setInputDate] = useState(date || getToday());
-  const [appliedDate, setAppliedDate] = useState(date || getToday());
 
-  useEffect(() => {
-    setAppliedDate(date || getToday());
-  }, [date]);
-
+  // Fetch state
   const { data, loading, error } = useSelector((state: RootState) => state.ticks);
 
   // Fetch stock names on mount
@@ -37,17 +35,20 @@ const StockDetails = () => {
     dispatch(fetchStockNames());
   }, [dispatch]);
 
-  // Keep selectedStock in sync with URL param
+  // Keep form state in sync with URL params (when navigating)
   useEffect(() => {
-    if (paramStockName) setSelectedStock(paramStockName);
-  }, [paramStockName]);
+    setSelectedStock(paramStockName || '');
+    setInputDate(date || getToday());
+  }, [paramStockName, date]);
 
-  // Only fetch when appliedDate or selectedStock changes
+  // Only fetch when the URL params change (i.e., after navigation)
   useEffect(() => {
-    if (selectedStock && appliedDate) {
-      dispatch(fetchTicks({ stockName: selectedStock, window, date: appliedDate }));
+    if (paramStockName && date) {
+      dispatch(fetchTicks({ stockName: paramStockName, window, date }));
+    } else if (paramStockName && !date) {
+      dispatch(fetchTicks({ stockName: paramStockName, window }));
     }
-  }, [dispatch, selectedStock, window, appliedDate]);
+  }, [dispatch, paramStockName, window, date]);
 
   // Handle stock dropdown change
   const handleStockChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -61,8 +62,12 @@ const StockDetails = () => {
 
   // Go button: update URL and trigger chart update
   const handleGo = () => {
-    if (selectedStock && inputDate) {
-      navigate(`/stock/${selectedStock}/date/${inputDate}`);
+    if (selectedStock) {
+      if (inputDate) {
+        navigate(`/stock/${selectedStock}/date/${inputDate}`);
+      } else {
+        navigate(`/stock/${selectedStock}`);
+      }
     }
   };
 
