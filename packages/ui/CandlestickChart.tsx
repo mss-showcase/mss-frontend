@@ -31,7 +31,6 @@ const CandlestickChart = ({ data }: Props) => {
 
     chartRef.current = chart;
 
-    // Új v5 szintaxis: típus és stílus opciók
     const series = chart.addSeries(CandlestickSeries, {
       upColor: '#4caf50',
       downColor: '#f44336',
@@ -39,12 +38,22 @@ const CandlestickChart = ({ data }: Props) => {
       wickDownColor: '#f44336',
     });
 
+    // Enable autoscale for the price scale (Y axis)
+    chart.priceScale('right').applyOptions({ autoScale: true });
+
     series.setData(data);
+
+    // Fit X axis to visible data
+    chart.timeScale().fitContent();
 
     const resizeObserver = new ResizeObserver(() => {
       chart.applyOptions({ width: containerRef.current!.clientWidth });
+      chart.timeScale().fitContent();
     });
-    resizeObserver.observe(containerRef.current);
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
 
     return () => {
       resizeObserver.disconnect();
@@ -52,7 +61,8 @@ const CandlestickChart = ({ data }: Props) => {
     };
   }, [data]);
 
-  return <div ref={containerRef} style={{ width: '100%' }} />;
+  // Ensure both width and height are set!
+  return <div ref={containerRef} style={{ width: '100%', height: 300 }} />;
 };
 
 export default CandlestickChart;
