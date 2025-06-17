@@ -6,6 +6,7 @@ import { fetchTicks, TickWindow } from '@mss-frontend/store/tickSlice';
 import { fetchStockNames } from '@mss-frontend/store/stockNamesSlice';
 import { fetchFundamentals } from '@mss-frontend/store/fundamentalsSlice';
 import { WindowSelector, ChartSection } from '@mss-frontend/ui';
+import FundamentalsDetails from './FundamentalsDetails';
 
 // Helper to get today's date in YYYY-MM-DD format
 const getToday = () => {
@@ -15,75 +16,6 @@ const getToday = () => {
   const dd = String(today.getDate()).padStart(2, '0');
   return `${yyyy}-${mm}-${dd}`;
 };
-
-const fundamentalsLabels: Record<string, string> = {
-  ReturnOnEquityTTM: 'Return on Equity (TTM)',
-  Sector: 'Sector',
-  Address: 'Address',
-  CIK: 'CIK',
-  '52WeekHigh': '52 Week High',
-  GrossProfitTTM: 'Gross Profit (TTM)',
-  '200DayMovingAverage': '200 Day Moving Average',
-  TrailingPE: 'Trailing P/E',
-  PriceToBookRatio: 'Price/Book Ratio',
-  DividendYield: 'Dividend Yield',
-  EVToRevenue: 'EV to Revenue',
-  OfficialSite: 'Official Site',
-  RevenuePerShareTTM: 'Revenue Per Share (TTM)',
-  Symbol: 'Symbol',
-  Name: 'Name',
-  DilutedEPSTTM: 'Diluted EPS (TTM)',
-  MarketCapitalization: 'Market Capitalization',
-  LatestQuarter: 'Latest Quarter',
-  symbol: 'Symbol',
-  AnalystRatingBuy: 'Analyst Rating (Buy)',
-  ProfitMargin: 'Profit Margin',
-  QuarterlyRevenueGrowthYOY: 'Quarterly Revenue Growth YOY',
-  EBITDA: 'EBITDA',
-  FiscalYearEnd: 'Fiscal Year End',
-  PEGRatio: 'PEG Ratio',
-  EVToEBITDA: 'EV to EBITDA',
-  DividendPerShare: 'Dividend Per Share',
-  SharesOutstanding: 'Shares Outstanding',
-  PERatio: 'P/E Ratio',
-  AnalystTargetPrice: 'Analyst Target Price',
-  Beta: 'Beta',
-  ForwardPE: 'Forward P/E',
-  AnalystRatingHold: 'Analyst Rating (Hold)',
-  '52WeekLow': '52 Week Low',
-  ttl: 'TTL',
-  Industry: 'Industry',
-  RevenueTTM: 'Revenue (TTM)',
-  QuarterlyEarningsGrowthYOY: 'Quarterly Earnings Growth YOY',
-  '50DayMovingAverage': '50 Day Moving Average',
-  AnalystRatingSell: 'Analyst Rating (Sell)',
-  DividendDate: 'Dividend Date',
-  Currency: 'Currency',
-  AnalystRatingStrongSell: 'Analyst Rating (Strong Sell)',
-  AnalystRatingStrongBuy: 'Analyst Rating (Strong Buy)',
-  as_of: 'As Of',
-  BookValue: 'Book Value',
-  PriceToSalesRatioTTM: 'Price to Sales Ratio (TTM)',
-  Country: 'Country',
-  EPS: 'Earnings Per Share (EPS)',
-  AssetType: 'Asset Type',
-  ExDividendDate: 'Ex-Dividend Date',
-  Description: 'Description',
-  OperatingMarginTTM: 'Operating Margin (TTM)',
-  ReturnOnAssetsTTM: 'Return on Assets (TTM)',
-  Exchange: 'Exchange',
-  DebtToEquity: 'Debt to Equity',
-};
-
-const mainMarkers = [
-  'MarketCapitalization',
-  'PERatio',
-  'EPS',
-  'DividendYield',
-  'PriceToBookRatio',
-  'ReturnOnEquityTTM',
-  'DebtToEquity',
-];
 
 const inputStyle: React.CSSProperties = {
   padding: '0.5rem',
@@ -118,9 +50,6 @@ const StockDetails = () => {
   // Form state
   const [selectedStock, setSelectedStock] = useState(paramStockName || '');
   const [inputDate, setInputDate] = useState(date || getToday());
-
-  // Fundamentals details toggle
-  const [showFundamentalsDetails, setShowFundamentalsDetails] = useState(false);
 
   // Fetch state
   const { data, loading, error } = useSelector((state: RootState) => state.ticks);
@@ -167,63 +96,6 @@ const StockDetails = () => {
         navigate(`/stock/${selectedStock}`);
       }
     }
-  };
-
-  // Render main fundamental markers
-  const renderMainFundamentals = () => {
-    if (!fundamentals.data) return null;
-    // Filter and sort mainMarkers that exist in the data
-    const sortedMainMarkers = mainMarkers
-      .filter((marker) => fundamentals.data[marker] !== undefined)
-      .sort((a, b) => a.localeCompare(b));
-    return (
-      <table style={{ marginTop: '1rem', marginBottom: '1rem', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr>
-            <th colSpan={2} style={{ textAlign: 'left', fontSize: '1.1rem', paddingBottom: 4 }}>Main Fundamentals</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sortedMainMarkers.map((marker) => (
-            <tr key={marker}>
-              <td style={{ fontWeight: 500, paddingRight: 12 }}>
-                {fundamentalsLabels[marker] || marker}
-              </td>
-              <td>{fundamentals.data[marker]}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    );
-  };
-
-  // Render all other fundamentals
-  const renderOtherFundamentals = () => {
-    if (!fundamentals.data) return null;
-    const otherKeys = Object.keys(fundamentals.data)
-      .filter((key) => !mainMarkers.includes(key))
-      .filter((key) => "TTL" !== key) // Exclude TTL
-      .sort((a, b) => a.localeCompare(b)); // Sort keys ascending
-    if (otherKeys.length === 0) return <div>No further details.</div>;
-    return (
-      <table style={{ marginTop: '0.5rem', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr>
-            <th colSpan={2} style={{ textAlign: 'left', fontSize: '1.05rem', paddingBottom: 4 }}>All Fundamentals</th>
-          </tr>
-        </thead>
-        <tbody>
-          {otherKeys.map((key) => (
-            <tr key={key}>
-              <td style={{ fontWeight: 500, paddingRight: 12 }}>
-                {fundamentalsLabels[key] || key}
-              </td>
-              <td>{fundamentals.data[key]}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    );
   };
 
   return (
@@ -324,24 +196,8 @@ const StockDetails = () => {
         !loading && <div>No tick data available for this stock and window.</div>
       )}
 
-      {/* Fundamentals main markers */}
-      {fundamentals.loading && <div>Loading fundamentals...</div>}
-      {fundamentals.error && <div style={{ color: 'red' }}>{fundamentals.error}</div>}
-      {fundamentals.data && renderMainFundamentals()}
-
-      {/* Fundamentals details toggle */}
-      {fundamentals.data && (
-        <div style={{ marginTop: '1rem' }}>
-          <button
-            className="button"
-            style={{ ...buttonStyle, maxWidth: 200, marginBottom: '0.5rem' }}
-            onClick={() => setShowFundamentalsDetails((v) => !v)}
-          >
-            {showFundamentalsDetails ? 'Hide Details' : 'Show All Fundamentals'}
-          </button>
-          {showFundamentalsDetails && renderOtherFundamentals()}
-        </div>
-      )}
+      {/* Fundamentals details */}
+      <FundamentalsDetails fundamentals={fundamentals} />
 
       {/* Data source attribution */}
       <div style={{ margin: '2rem', textAlign: 'center', color: '#666', fontSize: '0.95rem' }}>
