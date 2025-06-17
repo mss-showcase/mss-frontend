@@ -202,6 +202,7 @@ const StockDetails = () => {
     if (!fundamentals.data) return null;
     const otherKeys = Object.keys(fundamentals.data)
       .filter((key) => !mainMarkers.includes(key))
+      .filter((key) => "TTL" !== key) // Exclude TTL
       .sort((a, b) => a.localeCompare(b)); // Sort keys ascending
     if (otherKeys.length === 0) return <div>No further details.</div>;
     return (
