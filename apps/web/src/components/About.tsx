@@ -228,7 +228,9 @@ const About = () => (
             <li style={styles.techListItem}>API Gateway for backend routing</li>
             <li style={styles.techListItem}>Lambda functions for serverless compute</li>
             <li style={styles.techListItem}>Data processing and analytics</li>
-            <li style={styles.techListItem}>CloudFormation for infrastructure</li>
+            <li style={styles.techListItem}>S3 buckets for build data and business data and webhosting</li>
+            <li style={styles.techListItem}>SQS queue for rss feed processing and sentiment analysis</li>
+            <li style={styles.techListItem}>Github Actions + Terraform deploy</li>
           </ul>
         </div>
         <div style={styles.techCategory}>
