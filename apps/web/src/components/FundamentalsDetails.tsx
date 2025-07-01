@@ -138,9 +138,10 @@ type FundamentalsDetailsProps = {
     loading: boolean;
     error: string | null;
   };
+  onExpand?: (expanded: boolean) => void;
 };
 
-const FundamentalsDetails: React.FC<FundamentalsDetailsProps> = ({ fundamentals }) => {
+const FundamentalsDetails: React.FC<FundamentalsDetailsProps> = ({ fundamentals, onExpand }) => {
   const [showFundamentalsDetails, setShowFundamentalsDetails] = useState(false);
 
   // Extract asOf value and remove from fundamentals for table rendering
@@ -231,7 +232,11 @@ const FundamentalsDetails: React.FC<FundamentalsDetailsProps> = ({ fundamentals 
           <button
             className="button"
             style={{ maxWidth: 200, marginBottom: '0.5rem' }}
-            onClick={() => setShowFundamentalsDetails((v) => !v)}
+            onClick={() => {
+              const newState = !showFundamentalsDetails;
+              setShowFundamentalsDetails(newState);
+              onExpand?.(newState);
+            }}
           >
             {showFundamentalsDetails ? 'Hide Details' : 'Show All Fundamentals'}
           </button>

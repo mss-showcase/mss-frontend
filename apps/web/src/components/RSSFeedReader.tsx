@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 const FEEDS = [
   { label: 'Seeking Alpha', url: 'https://seekingalpha.com/market_currents.xml' },
   { label: 'CNBC', url: 'https://www.cnbc.com/id/100003114/device/rss/rss.html' },
-  { label: 'Investing.com', url: 'https://www.investing.com/rss/news_25.rss' },
+  { label: 'BBC', url: 'https://feeds.bbci.co.uk/news/business/rss.xml' },
   { label: 'MarketWatch', url: 'https://feeds.marketwatch.com/marketwatch/topstories/' }
 ];
 
@@ -26,6 +26,179 @@ function parseRSS(xml: string): FeedItem[] {
   }));
 }
 
+const styles = {
+  container: {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    padding: '2rem',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  } as React.CSSProperties,
+  
+  header: {
+    marginBottom: '2rem',
+    textAlign: 'center' as const,
+  } as React.CSSProperties,
+  
+  title: {
+    fontSize: '2.5rem',
+    fontWeight: '300',
+    color: '#2c3e50',
+    margin: '0 0 0.5rem 0',
+  } as React.CSSProperties,
+  
+  subtitle: {
+    fontSize: '1.1rem',
+    color: '#7f8c8d',
+    margin: 0,
+  } as React.CSSProperties,
+  
+  controlsCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: '12px',
+    padding: '2rem',
+    marginBottom: '2rem',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1)',
+    border: '1px solid #e1e8ed',
+  } as React.CSSProperties,
+  
+  inputGroup: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '0.5rem',
+    marginBottom: '1.5rem',
+  } as React.CSSProperties,
+  
+  label: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#374151',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.025em',
+  } as React.CSSProperties,
+  
+  select: {
+    padding: '0.75rem 1rem',
+    fontSize: '1rem',
+    borderRadius: '8px',
+    border: '2px solid #e5e7eb',
+    backgroundColor: '#ffffff',
+    transition: 'all 0.2s ease',
+    outline: 'none',
+    cursor: 'pointer',
+  } as React.CSSProperties,
+  
+  contentSection: {
+    backgroundColor: '#ffffff',
+    borderRadius: '12px',
+    padding: '2rem',
+    marginBottom: '2rem',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1)',
+    border: '1px solid #e1e8ed',
+  } as React.CSSProperties,
+  
+  sectionTitle: {
+    fontSize: '1.5rem',
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: '1rem',
+    borderBottom: '2px solid #e2e8f0',
+    paddingBottom: '0.5rem',
+  } as React.CSSProperties,
+  
+  loadingState: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '3rem',
+    fontSize: '1.1rem',
+    color: '#6b7280',
+  } as React.CSSProperties,
+  
+  errorState: {
+    color: '#ef4444',
+    backgroundColor: '#fef2f2',
+    border: '1px solid #fecaca',
+    borderRadius: '8px',
+    padding: '1rem',
+    marginBottom: '1rem',
+  } as React.CSSProperties,
+  
+  feedInfo: {
+    backgroundColor: '#f8fafc',
+    borderRadius: '8px',
+    padding: '1.5rem',
+    marginTop: '1rem',
+    border: '1px solid #e2e8f0',
+  } as React.CSSProperties,
+  
+  feedStatus: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    marginBottom: '0.5rem',
+  } as React.CSSProperties,
+  
+  feedIndicator: {
+    fontSize: '1.2rem',
+  } as React.CSSProperties,
+  
+  feedText: {
+    fontWeight: '500',
+    color: '#374151',
+  } as React.CSSProperties,
+  
+  articlesCount: {
+    fontSize: '0.9rem',
+    color: '#6b7280',
+    fontStyle: 'italic',
+  } as React.CSSProperties,
+  
+  newsArticle: {
+    border: '1px solid #e2e8f0',
+    borderRadius: '8px',
+    padding: '1.5rem',
+    marginBottom: '1.5rem',
+    backgroundColor: '#ffffff',
+    transition: 'all 0.2s ease',
+  } as React.CSSProperties,
+  
+  articleTitle: {
+    fontSize: '1.2rem',
+    fontWeight: '600',
+    marginBottom: '0.5rem',
+    lineHeight: '1.4',
+  } as React.CSSProperties,
+  
+  articleLink: {
+    color: '#3b82f6',
+    textDecoration: 'none',
+  } as React.CSSProperties,
+  
+  articleDate: {
+    fontSize: '0.8rem',
+    color: '#6b7280',
+    marginBottom: '1rem',
+  } as React.CSSProperties,
+  
+  articleDescription: {
+    fontSize: '0.9rem',
+    lineHeight: '1.6',
+    color: '#4b5563',
+    marginBottom: '1rem',
+  } as React.CSSProperties,
+  
+  readMoreBtn: {
+    backgroundColor: '#3b82f6',
+    color: 'white',
+    padding: '0.5rem 1rem',
+    borderRadius: '6px',
+    fontSize: '0.9rem',
+    textDecoration: 'none',
+    display: 'inline-block',
+    transition: 'background-color 0.2s ease',
+  } as React.CSSProperties,
+};
+
 export const RSSFeedReader: React.FC = () => {
   const [selectedFeed, setSelectedFeed] = useState(FEEDS[0].url);
   const [items, setItems] = useState<FeedItem[]>([]);
@@ -47,67 +220,156 @@ export const RSSFeedReader: React.FC = () => {
       });
   }, [selectedFeed]);
 
+  const selectedFeedLabel = FEEDS.find(feed => feed.url === selectedFeed)?.label || 'Unknown';
+
   return (
-    <div className="welcome" style={{ maxWidth: 700, margin: '0 auto', padding: 24 }}>
-      <h2 style={{ color: '#007bff', marginBottom: 16 }}>News Feed</h2>
-      <div style={{ marginBottom: 20 }}>
-        <label htmlFor="feed-select" style={{ fontWeight: 'bold', marginRight: 8 }}>Select Feed:</label>
-        <select
-          id="feed-select"
-          value={selectedFeed}
-          onChange={e => setSelectedFeed(e.target.value)}
-          style={{
-            padding: '8px 12px',
-            borderRadius: 5,
-            border: '1px solid #e0e7ff',
-            fontSize: 16,
-            background: '#f4f4f4',
-            color: '#333',
-            outline: 'none'
-          }}
-        >
-          {FEEDS.map(feed => (
-            <option key={feed.url} value={feed.url}>{feed.label}</option>
-          ))}
-        </select>
+    <div style={styles.container}>
+      {/* Header */}
+      <div style={styles.header}>
+        <h1 style={styles.title}>📰 Financial News</h1>
+        <p style={styles.subtitle}>
+          Stay updated with the latest market news and analysis from trusted sources
+        </p>
       </div>
-      {loading && <p style={{ color: '#007bff' }}>Loading...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <ul style={{ listStyle: 'none', padding: 0 }}>
-        {items.map((item, idx) => (
-          <li
-            key={idx}
+
+      {/* News Source Selection */}
+      <div style={styles.controlsCard}>
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>News Source</label>
+          <select
+            value={selectedFeed}
+            onChange={e => setSelectedFeed(e.target.value)}
             style={{
-              marginBottom: 24,
-              borderBottom: '1px solid #e0e7ff',
-              paddingBottom: 12,
-              background: '#fff',
-              borderRadius: 5,
-              boxShadow: '0 2px 5px rgba(0,0,0,0.04)',
-              padding: '16px 16px 12px 16px'
+              ...styles.select,
+              borderColor: selectedFeed ? '#3b82f6' : '#e5e7eb',
             }}
+            disabled={loading}
           >
-            <a
-              href={item.link}
-              target="_blank"
-              rel="noopener noreferrer"
+            {FEEDS.map(feed => (
+              <option key={feed.url} value={feed.url}>
+                {feed.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        <div style={styles.feedInfo}>
+          <div style={styles.feedStatus}>
+            <span style={styles.feedIndicator}>
+              {loading ? '🔄' : error ? '❌' : '✅'}
+            </span>
+            <span style={styles.feedText}>
+              {loading ? 'Loading...' : error ? 'Connection Error' : `Connected to ${selectedFeedLabel}`}
+            </span>
+          </div>
+          {!loading && !error && (
+            <div style={styles.articlesCount}>
+              {items.length} articles available
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Error State */}
+      {error && (
+        <div style={styles.contentSection}>
+          <div style={styles.errorState}>
+            <strong>⚠️ Failed to Load News Feed</strong>
+            <p style={{ margin: '0.5rem 0 0 0' }}>{error}</p>
+            <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9rem' }}>
+              This might be due to CORS restrictions or network issues. Please try a different news source.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {loading && (
+        <div style={styles.contentSection}>
+          <div style={styles.loadingState}>
+            <div>Loading news articles from {selectedFeedLabel}...</div>
+          </div>
+        </div>
+      )}
+
+      {/* Articles */}
+      {!loading && !error && items.length > 0 && (
+        <div style={styles.contentSection}>
+          <h2 style={styles.sectionTitle}>Latest Articles</h2>
+          <div style={{ fontSize: '0.9rem', color: '#6b7280', marginBottom: '1.5rem' }}>
+            From {selectedFeedLabel}
+          </div>
+          
+          {items.map((item, idx) => (
+            <article 
+              key={idx} 
               style={{
-                fontWeight: 'bold',
-                color: '#007bff',
-                fontSize: 18,
-                textDecoration: 'none'
+                ...styles.newsArticle,
+                transform: 'translateY(0)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1)';
               }}
             >
-              {item.title}
-            </a>
-            <div style={{ fontSize: 12, color: '#888', margin: '4px 0 8px 0' }}>{item.pubDate}</div>
-            <div
-              dangerouslySetInnerHTML={{ __html: item.description || '' }}
-              style={{ fontSize: 15, color: '#333' }}
-            />
-          </li>
-        ))}
-      </ul>
+              <h3 style={styles.articleTitle}>
+                <a
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={styles.articleLink}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.textDecoration = 'underline';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.textDecoration = 'none';
+                  }}
+                >
+                  {item.title}
+                </a>
+              </h3>
+              
+              {item.pubDate && (
+                <div style={styles.articleDate}>
+                  {new Date(item.pubDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </div>
+              )}
+              
+              {item.description && (
+                <div 
+                  style={styles.articleDescription}
+                  dangerouslySetInnerHTML={{ __html: item.description }}
+                />
+              )}
+              
+              <a
+                href={item.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={styles.readMoreBtn}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#2563eb';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#3b82f6';
+                }}
+              >
+                Read Full Article →
+              </a>
+            </article>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

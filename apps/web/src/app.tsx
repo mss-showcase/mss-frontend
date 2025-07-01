@@ -6,9 +6,11 @@ const App = () => {
   return (
     <>
       <header className="app-header">
-        MSS Showcase WebApp
+        <div className="header-content">
+          <h1 className="app-title">MSS Showcase WebApp</h1>
+          <AppMenu />
+        </div>
       </header>
-      <AppMenu />
       <main className="app-content">
         <Navigation />
       </main>

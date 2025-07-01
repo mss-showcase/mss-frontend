@@ -3,13 +3,15 @@ import userReducer from './userSlice';
 import stockNamesReducer from './stockNamesSlice';
 import TickReducer from './tickSlice';
 import FundamentalsReducer from './fundamentalsSlice';
+import analysisReducer from './analysisSlice';
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
     stockNames: stockNamesReducer,
     ticks: TickReducer,
-    fundamentals: FundamentalsReducer
+    fundamentals: FundamentalsReducer,
+    analysis: analysisReducer
   },
 });
 
