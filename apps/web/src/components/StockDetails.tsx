@@ -322,6 +322,19 @@ const styles = {
   } as React.CSSProperties,
 };
 
+// Responsive hook for mobile detection
+function useIsMobile(breakpoint = 800) {
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < breakpoint : false
+  );
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < breakpoint);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 const StockDetails = () => {
   const { stockName: paramStockName, date } = useParams<{ stockName: string, date?: string }>();
   const dispatch = useDispatch<AppDispatch>();
@@ -347,6 +360,7 @@ const StockDetails = () => {
   const { data, loading, error } = useSelector((state: RootState) => state.ticks);
   const fundamentals = useSelector((state: RootState) => state.fundamentals);
   const analysis = useSelector((state: RootState) => state.analysis);
+  const isMobile = useIsMobile();
 
   // Fetch stock names on mount
   useEffect(() => {
@@ -580,13 +594,9 @@ const StockDetails = () => {
 
   // Responsive helper for analysis container
   const getResponsiveAnalysisContainer = (expanded: boolean) => {
-    // Use single column on small screens
-    if (typeof window !== 'undefined' && window.innerWidth < 800) {
-      return expanded
-        ? { display: 'block', marginBottom: '2rem' }
-        : { display: 'block', marginBottom: '2rem' };
+    if (isMobile) {
+      return { display: 'block', marginBottom: '2rem' };
     }
-    // Default desktop styles
     return expanded
       ? styles.analysisContainerExpanded
       : styles.analysisContainer;
