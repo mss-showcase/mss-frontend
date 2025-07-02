@@ -578,6 +578,20 @@ const StockDetails = () => {
     // - Showing additional analysis
   };
 
+  // Responsive helper for analysis container
+  const getResponsiveAnalysisContainer = (expanded: boolean) => {
+    // Use single column on small screens
+    if (typeof window !== 'undefined' && window.innerWidth < 800) {
+      return expanded
+        ? { display: 'block', marginBottom: '2rem' }
+        : { display: 'block', marginBottom: '2rem' };
+    }
+    // Default desktop styles
+    return expanded
+      ? styles.analysisContainerExpanded
+      : styles.analysisContainer;
+  };
+
   return (
     <div style={styles.container}>
       {/* Header */}
@@ -802,7 +816,7 @@ const StockDetails = () => {
 
       {/* Fundamentals and Sentiment Analysis Sections */}
       {paramStockName && (
-        <div style={fundamentalsExpanded || showAnalysisBreakdown ? styles.analysisContainerExpanded : styles.analysisContainer}>
+        <div style={getResponsiveAnalysisContainer(fundamentalsExpanded || showAnalysisBreakdown)}>
           <div style={styles.contentSection}>
             <h2 style={styles.sectionTitle}>📊 Fundamentals Analysis</h2>
             <FundamentalsDetails 
