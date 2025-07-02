@@ -19,6 +19,7 @@ const AppMenu = () => {
       </button>
       <ul className={`menu-list${open ? ' open' : ''}`}>
         <li><Link to="/" onClick={() => setOpen(false)}>Home</Link></li>
+        <li><Link to="/what-to-buy" onClick={() => setOpen(false)}>What to Buy?</Link></li>
         <li><Link to="/news" onClick={() => setOpen(false)}>News</Link></li>
         <li><Link to="/weather" onClick={() => setOpen(false)}>Weather</Link></li>
         <li><Link to="/about" onClick={() => setOpen(false)}>About</Link></li>
