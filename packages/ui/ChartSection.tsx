@@ -2,9 +2,23 @@ import React from 'react';
 import CandlestickChart from './CandlestickChart';
 import type { CandlestickData } from 'lightweight-charts';
 
-type Props = { ticks: any[] };
+interface MarkerDataPoint {
+  time: string;
+  value: number;
+}
 
-export const ChartSection: React.FC<Props> = ({ ticks }) => (
+interface MarkerData {
+  symbol: string;
+  marker: string;
+  series: MarkerDataPoint[];
+}
+
+type Props = { 
+  ticks: any[]; 
+  markerData?: MarkerData[];
+};
+
+export const ChartSection: React.FC<Props> = ({ ticks, markerData = [] }) => (
   <div>
     <pre style={{ background: '#f4f4f4', padding: 12, borderRadius: 6, overflowX: 'auto' }}>
       <CandlestickChart
@@ -15,6 +29,7 @@ export const ChartSection: React.FC<Props> = ({ ticks }) => (
           low: tick.low,
           close: tick.close,
         })) as CandlestickData[]}
+        markerData={markerData}
       />
     </pre>
   </div>
