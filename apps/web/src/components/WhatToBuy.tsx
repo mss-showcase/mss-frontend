@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { RootState } from '../../../../packages/store';
 import { fetchStockNames } from '../../../../packages/store/stockNamesSlice';
 import { getGatewayUrl, loadConfig } from '../../../../packages/store/apiConfig';
@@ -34,6 +35,7 @@ interface StockAnalysis {
 
 const WhatToBuy = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { items: stockNames, loading: stockLoading } = useSelector((state: RootState) => state.stockNames);
   
   const [analysisData, setAnalysisData] = useState<StockAnalysis[]>(() => {
@@ -58,6 +60,7 @@ const WhatToBuy = () => {
     return saved ? parseInt(saved) : null;
   });
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
 
   // Persist cache time to localStorage
   useEffect(() => {
@@ -231,6 +234,10 @@ const WhatToBuy = () => {
     return () => clearInterval(interval);
   }, [lastFetchTime, cacheMinutes, analysisData.length]);
 
+  const handleTickerClick = (ticker: string) => {
+    navigate(`/stock/${ticker}`);
+  };
+
   if (stockLoading || loading) {
     const progressPercentage = fetchProgress.total > 0 
       ? Math.round((fetchProgress.completed / fetchProgress.total) * 100) 
@@ -334,9 +341,41 @@ const WhatToBuy = () => {
             margin: 0,
             background: 'linear-gradient(135deg, #2196f3, #1976d2)',
             WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
+            WebkitTextFillColor: 'transparent',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem'
           }}>
             What to Buy?
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <div
+                style={{
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  background: '#2196f3',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+                onClick={() => setShowInfo(!showInfo)}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = '#1976d2';
+                  e.currentTarget.style.transform = 'scale(1.1)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = '#2196f3';
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+              >
+                i
+              </div>
+            </div>
           </h1>
           
           <div style={{
@@ -484,6 +523,7 @@ const WhatToBuy = () => {
                   e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
                 }}
+                onClick={() => handleTickerClick(stock.ticker)}
               >
                 <div style={{
                   display: 'flex',
@@ -491,12 +531,27 @@ const WhatToBuy = () => {
                   alignItems: 'center',
                   marginBottom: '1rem'
                 }}>
-                  <h3 style={{
-                    fontSize: '1.5rem',
-                    fontWeight: 'bold',
-                    margin: 0,
-                    color: '#333'
-                  }}>
+                  <h3 
+                    style={{
+                      fontSize: '1.5rem',
+                      fontWeight: 'bold',
+                      margin: 0,
+                      color: '#2196f3',
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                      transition: 'color 0.2s ease'
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleTickerClick(stock.ticker);
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = '#1976d2';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = '#2196f3';
+                    }}
+                  >
                     {stock.ticker}
                   </h3>
                   <span style={{
@@ -577,8 +632,26 @@ const WhatToBuy = () => {
                 {sortedData.map((stock) => (
                   <>
                     <tr key={stock.ticker} style={{ borderBottom: '1px solid #e0e0e0' }}>
-                      <td style={{ padding: '1rem', fontWeight: 'bold', fontSize: '1.1rem' }}>
-                        {stock.ticker}
+                      <td style={{ padding: '1rem' }}>
+                        <span 
+                          style={{ 
+                            fontWeight: 'bold', 
+                            fontSize: '1.1rem',
+                            color: '#2196f3',
+                            cursor: 'pointer',
+                            textDecoration: 'underline',
+                            transition: 'color 0.2s ease'
+                          }}
+                          onClick={() => handleTickerClick(stock.ticker)}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.color = '#1976d2';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.color = '#2196f3';
+                          }}
+                        >
+                          {stock.ticker}
+                        </span>
                       </td>
                       <td style={{ padding: '1rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -703,6 +776,108 @@ const WhatToBuy = () => {
           }}>
             <h3>No analysis data available</h3>
             <p>Please check that the analysis endpoints are working correctly.</p>
+          </div>
+        )}
+
+        {/* Info Modal Overlay */}
+        {showInfo && (
+          <div 
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              padding: '1rem'
+            }}
+            onClick={() => setShowInfo(false)}
+          >
+            <div 
+              style={{
+                background: 'white',
+                borderRadius: '16px',
+                padding: '2rem',
+                maxWidth: '600px',
+                width: '100%',
+                maxHeight: '80vh',
+                overflowY: 'auto',
+                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.2)',
+                border: '1px solid rgba(0, 0, 0, 0.1)',
+                position: 'relative'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'flex-start',
+                marginBottom: '1.5rem'
+              }}>
+                <h3 style={{ 
+                  margin: 0, 
+                  color: '#2196f3', 
+                  fontSize: '1.4rem',
+                  fontWeight: 'bold'
+                }}>
+                  📊 Smart Stock Analysis Dashboard
+                </h3>
+                <button
+                  onClick={() => setShowInfo(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '1.8rem',
+                    cursor: 'pointer',
+                    color: '#666',
+                    padding: '0.25rem',
+                    lineHeight: 1,
+                    borderRadius: '50%',
+                    width: '32px',
+                    height: '32px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f0f0f0';
+                    e.currentTarget.style.color = '#333';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = '#666';
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+              <div style={{ 
+                fontSize: '1rem', 
+                lineHeight: '1.6', 
+                color: '#333'
+              }}>
+                <div style={{ marginBottom: '1rem' }}>
+                  <strong>🎯 What this page does:</strong> Analyzes all available stocks and provides buy/sell/hold recommendations based on multiple data sources.
+                </div>
+                <div style={{ marginBottom: '1rem' }}>
+                  <strong>📈 Features:</strong>
+                  <ul style={{ margin: '0.5rem 0', paddingLeft: '1.5rem' }}>
+                    <li>Color-coded tiles (green=buy, red=sell, orange=hold) and sortable table views</li>
+                    <li>Comprehensive scoring from technical analysis, fundamentals, and sentiment analysis</li>
+                    <li>Click any ticker symbol to navigate to detailed stock charts and analysis</li>
+                    <li>Configurable cache duration (1-5 minutes) with auto-refresh capabilities</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong>⚡ Performance:</strong> Smart caching system prevents unnecessary API calls while keeping data fresh with progress tracking for all analysis fetches.
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
