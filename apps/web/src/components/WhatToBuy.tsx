@@ -36,54 +36,141 @@ const WhatToBuy = () => {
   const dispatch = useDispatch();
   const { items: stockNames, loading: stockLoading } = useSelector((state: RootState) => state.stockNames);
   
-  const [analysisData, setAnalysisData] = useState<StockAnalysis[]>([]);
+  const [analysisData, setAnalysisData] = useState<StockAnalysis[]>(() => {
+    // Try to restore cached data on component mount
+    try {
+      const cached = localStorage.getItem('whatToBuy_analysisData');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState<'tiles' | 'table'>('tiles');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [sortField, setSortField] = useState<keyof StockAnalysis>('totalScore');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [fetchProgress, setFetchProgress] = useState({ completed: 0, total: 0 });
+  const [cacheMinutes, setCacheMinutes] = useState(3); // Default 3 minutes
+  const [lastFetchTime, setLastFetchTime] = useState<number | null>(() => {
+    // Persist cache time across navigation
+    const saved = localStorage.getItem('whatToBuy_lastFetchTime');
+    return saved ? parseInt(saved) : null;
+  });
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Persist cache time to localStorage
+  useEffect(() => {
+    if (lastFetchTime) {
+      localStorage.setItem('whatToBuy_lastFetchTime', lastFetchTime.toString());
+    }
+  }, [lastFetchTime]);
+
+  // Persist analysis data to localStorage
+  useEffect(() => {
+    if (analysisData.length > 0) {
+      localStorage.setItem('whatToBuy_analysisData', JSON.stringify(analysisData));
+    }
+  }, [analysisData]);
 
   useEffect(() => {
     dispatch(fetchStockNames() as any);
   }, [dispatch]);
 
-  useEffect(() => {
-    const fetchAnalysisData = async () => {
-      if (!stockNames.length) return;
+  // Check if data is cached and still valid
+  const isCacheValid = () => {
+    if (!lastFetchTime || analysisData.length === 0) return false;
+    const cacheExpiryTime = lastFetchTime + (cacheMinutes * 60 * 1000);
+    return Date.now() < cacheExpiryTime;
+  };
+
+  const fetchAnalysisData = async (forceRefresh = false) => {
+    if (!stockNames.length) return;
+    
+    // Don't fetch if cache is valid and not forcing refresh
+    if (!forceRefresh && isCacheValid()) {
+      return;
+    }
+    
+    setLoading(true);
+    setIsRefreshing(forceRefresh);
+    
+    // Only clear data if we don't have any or if forcing refresh
+    if (analysisData.length === 0 || forceRefresh) {
+      setAnalysisData([]);
+    }
+    
+    setFetchProgress({ completed: 0, total: stockNames.length });
+    
+    try {
+      await loadConfig(); // Ensure config is loaded
+      const gatewayUrl = getGatewayUrl();
       
-      setLoading(true);
-      try {
-        await loadConfig(); // Ensure config is loaded
-        const gatewayUrl = getGatewayUrl();
-        
-        const analysisPromises = stockNames.map(async (ticker: string) => {
+      let completedCount = 0;
+      const successfulResults: StockAnalysis[] = [];
+      
+      // Process stocks sequentially to update progress
+      for (const ticker of stockNames) {
+        try {
           const response = await fetch(`${gatewayUrl}/analysis/${ticker}/explanation`);
           if (response.ok) {
             const data: AnalysisData = await response.json();
             // Transform the data to our interface
-            return {
+            const transformedData: StockAnalysis = {
               ticker: data.ticker,
               finalSuggestion: data.finalSuggestion,
               totalScore: data.totalScore,
               breakdown: data.breakdown,
               weights: data.weights
-            } as StockAnalysis;
+            };
+            successfulResults.push(transformedData);
+            
+            // Update results immediately for progressive display
+            setAnalysisData([...successfulResults]);
           }
-          return null;
-        });
+        } catch (error) {
+          console.error(`Error fetching analysis for ${ticker}:`, error);
+        }
         
-        const results = await Promise.all(analysisPromises);
-        const validResults = results.filter((result: any) => result !== null) as StockAnalysis[];
-        setAnalysisData(validResults);
-      } catch (error) {
-        console.error('Error fetching analysis data:', error);
-      } finally {
-        setLoading(false);
+        completedCount++;
+        setFetchProgress({ completed: completedCount, total: stockNames.length });
       }
-    };
+      
+      // Update last fetch time on successful completion
+      setLastFetchTime(Date.now());
+      
+    } catch (error) {
+      console.error('Error fetching analysis data:', error);
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  };
 
+  useEffect(() => {
     fetchAnalysisData();
   }, [stockNames]);
+
+  const handleManualRefresh = () => {
+    fetchAnalysisData(true);
+  };
+
+  const getTimeUntilRefresh = () => {
+    if (!lastFetchTime) return 0;
+    const cacheExpiryTime = lastFetchTime + (cacheMinutes * 60 * 1000);
+    const remainingTime = Math.max(0, cacheExpiryTime - Date.now());
+    return Math.ceil(remainingTime / 1000); // Return seconds
+  };
+
+  const formatTimeRemaining = (seconds: number) => {
+    if (seconds <= 0) return 'Ready to refresh';
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    if (minutes > 0) {
+      return `${minutes}m ${remainingSeconds}s until auto-refresh`;
+    }
+    return `${remainingSeconds}s until auto-refresh`;
+  };
 
   const getSuggestionColor = (suggestion: string) => {
     switch (suggestion.toLowerCase()) {
@@ -128,23 +215,91 @@ const WhatToBuy = () => {
       : bStr.localeCompare(aStr);
   });
 
+  // Auto-refresh timer and countdown update
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Force a re-render to update the countdown display
+      if (lastFetchTime && analysisData.length > 0) {
+        const timeLeft = getTimeUntilRefresh();
+        if (timeLeft <= 0) {
+          // Auto-refresh when cache expires
+          fetchAnalysisData();
+        }
+      }
+    }, 1000); // Update every second
+
+    return () => clearInterval(interval);
+  }, [lastFetchTime, cacheMinutes, analysisData.length]);
+
   if (stockLoading || loading) {
+    const progressPercentage = fetchProgress.total > 0 
+      ? Math.round((fetchProgress.completed / fetchProgress.total) * 100) 
+      : 0;
+
     return (
       <div style={{
         padding: '2rem',
         textAlign: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: 'linear-gradient(135deg, #e3f2fd 0%, #f5f5f5 100%)',
         minHeight: '100vh',
-        color: 'white'
+        color: '#333'
       }}>
         <div style={{
           background: 'rgba(255, 255, 255, 0.95)',
           borderRadius: '16px',
           padding: '2rem',
           color: '#333',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+          maxWidth: '600px',
+          margin: '0 auto',
+          border: '1px solid rgba(0, 0, 0, 0.1)'
         }}>
-          Loading stock analysis...
+          <h2 style={{ 
+            margin: '0 0 1.5rem 0',
+            fontSize: '1.5rem',
+            fontWeight: 'bold'
+          }}>
+            {stockLoading ? 'Loading stock list...' : isRefreshing ? 'Refreshing analysis...' : 'Analyzing stocks...'}
+          </h2>
+          
+          {fetchProgress.total > 0 && (
+            <>
+              <div style={{
+                width: '100%',
+                height: '12px',
+                backgroundColor: '#e0e0e0',
+                borderRadius: '6px',
+                overflow: 'hidden',
+                marginBottom: '1rem'
+              }}>
+                <div style={{
+                  width: `${progressPercentage}%`,
+                  height: '100%',
+                  background: 'linear-gradient(90deg, #2196f3, #1976d2)',
+                  borderRadius: '6px',
+                  transition: 'width 0.3s ease-in-out'
+                }} />
+              </div>
+              
+              <div style={{
+                fontSize: '1rem',
+                color: '#666',
+                marginBottom: '1rem'
+              }}>
+                Analyzing {fetchProgress.completed} of {fetchProgress.total} stocks ({progressPercentage}%)
+              </div>
+            </>
+          )}
+          
+          {analysisData.length > 0 && (
+            <div style={{
+              fontSize: '0.9rem',
+              color: '#888',
+              fontStyle: 'italic'
+            }}>
+              {analysisData.length} results loaded so far...
+            </div>
+          )}
         </div>
       </div>
     );
@@ -153,16 +308,17 @@ const WhatToBuy = () => {
   return (
     <div style={{
       padding: '2rem',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'linear-gradient(135deg, #e3f2fd 0%, #f5f5f5 100%)',
       minHeight: '100vh',
-      color: 'white'
+      color: '#333'
     }}>
       <div style={{
         background: 'rgba(255, 255, 255, 0.95)',
         borderRadius: '16px',
         padding: '2rem',
         color: '#333',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+        border: '1px solid rgba(0, 0, 0, 0.1)'
       }}>
         <div style={{
           display: 'flex',
@@ -176,7 +332,7 @@ const WhatToBuy = () => {
             fontSize: '2.5rem',
             fontWeight: 'bold',
             margin: 0,
-            background: 'linear-gradient(135deg, #667eea, #764ba2)',
+            background: 'linear-gradient(135deg, #2196f3, #1976d2)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
@@ -186,37 +342,119 @@ const WhatToBuy = () => {
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '1rem'
+            gap: '1rem',
+            flexWrap: 'wrap'
           }}>
-            <span style={{ fontSize: '0.9rem', color: '#666' }}>View:</span>
-            <button
-              onClick={() => setViewMode('tiles')}
-              style={{
-                padding: '0.5rem 1rem',
-                borderRadius: '8px',
-                border: 'none',
-                background: viewMode === 'tiles' ? '#667eea' : '#e0e0e0',
-                color: viewMode === 'tiles' ? 'white' : '#333',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              Tiles
-            </button>
-            <button
-              onClick={() => setViewMode('table')}
-              style={{
-                padding: '0.5rem 1rem',
-                borderRadius: '8px',
-                border: 'none',
-                background: viewMode === 'table' ? '#667eea' : '#e0e0e0',
-                color: viewMode === 'table' ? 'white' : '#333',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              Table
-            </button>
+            {/* Cache Duration Selector */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              fontSize: '0.9rem',
+              color: '#666'
+            }}>
+              <span>Cache:</span>
+              <select
+                value={cacheMinutes}
+                onChange={(e) => setCacheMinutes(parseInt(e.target.value))}
+                style={{
+                  padding: '0.25rem 0.5rem',
+                  borderRadius: '4px',
+                  border: '1px solid #ddd',
+                  fontSize: '0.85rem',
+                  background: 'white'
+                }}
+              >
+                <option value={1}>1 min</option>
+                <option value={2}>2 min</option>
+                <option value={3}>3 min</option>
+                <option value={4}>4 min</option>
+                <option value={5}>5 min</option>
+              </select>
+            </div>
+
+            {/* Cache Status and Refresh Button */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              {lastFetchTime && (
+                <div style={{
+                  fontSize: '0.8rem',
+                  color: '#666',
+                  fontStyle: 'italic'
+                }}>
+                  {formatTimeRemaining(getTimeUntilRefresh())}
+                </div>
+              )}
+              
+              <button
+                onClick={handleManualRefresh}
+                disabled={loading}
+                style={{
+                  padding: '0.5rem 1rem',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: loading ? '#ccc' : '#28a745',
+                  color: 'white',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  fontSize: '0.85rem',
+                  fontWeight: 'bold',
+                  transition: 'all 0.3s ease',
+                  opacity: loading ? 0.6 : 1
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.background = '#218838';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.background = '#28a745';
+                  }
+                }}
+              >
+                {loading ? '⟳ Refreshing...' : '↻ Refresh'}
+              </button>
+            </div>
+
+            {/* View Mode Selector */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <span style={{ fontSize: '0.9rem', color: '#666' }}>View:</span>
+              <button
+                onClick={() => setViewMode('tiles')}
+                style={{
+                  padding: '0.5rem 1rem',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: viewMode === 'tiles' ? '#2196f3' : '#e0e0e0',
+                  color: viewMode === 'tiles' ? 'white' : '#333',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                Tiles
+              </button>
+              <button
+                onClick={() => setViewMode('table')}
+                style={{
+                  padding: '0.5rem 1rem',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: viewMode === 'table' ? '#2196f3' : '#e0e0e0',
+                  color: viewMode === 'table' ? 'white' : '#333',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                Table
+              </button>
+            </div>
           </div>
         </div>
 
@@ -373,9 +611,9 @@ const WhatToBuy = () => {
                             width: '30px',
                             height: '30px',
                             borderRadius: '50%',
-                            border: '2px solid #667eea',
-                            background: expandedRows.has(stock.ticker) ? '#667eea' : 'white',
-                            color: expandedRows.has(stock.ticker) ? 'white' : '#667eea',
+                            border: '2px solid #2196f3',
+                            background: expandedRows.has(stock.ticker) ? '#2196f3' : 'white',
+                            color: expandedRows.has(stock.ticker) ? 'white' : '#2196f3',
                             cursor: 'pointer',
                             fontSize: '1rem',
                             fontWeight: 'bold',

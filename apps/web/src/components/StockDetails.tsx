@@ -249,39 +249,44 @@ const styles = {
   } as React.CSSProperties,
 
   markersSection: {
-    marginTop: '1.5rem',
-    padding: '1.5rem',
+    marginTop: '1rem',
+    padding: '0.75rem 1rem',
     backgroundColor: '#f8fafc',
-    borderRadius: '8px',
+    borderRadius: '6px',
     border: '1px solid #e2e8f0',
   } as React.CSSProperties,
 
   markersTitle: {
-    fontSize: '1rem',
+    fontSize: '0.85rem',
     fontWeight: '600',
     color: '#1e293b',
-    marginBottom: '1rem',
+    marginBottom: '0.5rem',
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
   } as React.CSSProperties,
 
   markersGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-    gap: '0.5rem',
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '0.25rem',
+    alignItems: 'center',
   } as React.CSSProperties,
 
   markerButton: {
-    padding: '0.5rem 0.75rem',
-    fontSize: '0.85rem',
-    borderRadius: '6px',
+    padding: '0.25rem 0.5rem',
+    fontSize: '0.7rem',
+    borderRadius: '4px',
     border: '1px solid #d1d5db',
     backgroundColor: '#ffffff',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    textAlign: 'left' as const,
-    position: 'relative' as const,
+    transition: 'all 0.15s ease',
+    textAlign: 'center' as const,
+    minWidth: '40px',
+    height: '24px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   } as React.CSSProperties,
 
   markerButtonActive: {
@@ -302,10 +307,18 @@ const styles = {
   } as React.CSSProperties,
 
   markersInfo: {
-    fontSize: '0.8rem',
+    fontSize: '0.7rem',
     color: '#6b7280',
-    marginTop: '0.5rem',
+    marginLeft: '0.5rem',
     fontStyle: 'italic',
+  } as React.CSSProperties,
+
+  compactInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    fontSize: '0.75rem',
+    color: '#6b7280',
   } as React.CSSProperties,
 };
 
@@ -713,68 +726,68 @@ const StockDetails = () => {
               
               {/* Technical Analysis Markers */}
               <div style={styles.markersSection}>
-                <div style={styles.markersTitle}>
-                  📊 Technical Analysis Markers
-                  {markersLoading && <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>Loading...</span>}
-                  {activeMarkers.size > 0 && (
-                    <span style={{ fontSize: '0.8rem', color: '#059669' }}>
-                      ({activeMarkers.size} active)
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: '600', color: '#1e293b', whiteSpace: 'nowrap' }}>
+                      📊 TA Markers:
                     </span>
-                  )}
+                    <div style={styles.markersGrid}>
+                      {availableMarkers.map((marker) => {
+                        const isActive = activeMarkers.has(marker.id);
+                        const isFailed = failedMarkers.has(marker.id);
+                        const hasValidData = markerData.has(marker.id);
+                        
+                        return (
+                          <button
+                            key={marker.id}
+                            onClick={() => toggleMarker(marker.id)}
+                            disabled={markersLoading}
+                            title={isFailed ? `${marker.name} (Failed to load)` : marker.name}
+                            style={{
+                              ...styles.markerButton,
+                              ...(isActive && hasValidData ? styles.markerButtonActive : {}),
+                              ...(isFailed ? styles.markerButtonError : {}),
+                              ...(markersLoading ? styles.markerButtonLoading : {}),
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!markersLoading && !isActive && !isFailed) {
+                                e.currentTarget.style.backgroundColor = '#f3f4f6';
+                                e.currentTarget.style.borderColor = '#9ca3af';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!markersLoading && !isActive && !isFailed) {
+                                e.currentTarget.style.backgroundColor = '#ffffff';
+                                e.currentTarget.style.borderColor = '#d1d5db';
+                              }
+                            }}
+                          >
+                            {marker.id}
+                            {isFailed && <span style={{ marginLeft: '0.125rem', fontSize: '0.6rem' }}>⚠</span>}
+                            {isActive && hasValidData && <span style={{ marginLeft: '0.125rem', fontSize: '0.6rem' }}>✓</span>}
+                          </button>
+                        );
+                      })}
+                      {availableMarkers.length === 0 && (
+                        <span style={{ fontSize: '0.7rem', color: '#9ca3af' }}>None available</span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div style={styles.compactInfo}>
+                    {markersLoading && <span>Loading...</span>}
+                    {activeMarkers.size > 0 && (
+                      <span style={{ color: '#059669', fontWeight: '500' }}>
+                        {activeMarkers.size} active
+                      </span>
+                    )}
+                    {failedMarkers.size > 0 && (
+                      <span style={{ color: '#dc2626' }}>
+                        {failedMarkers.size} failed
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div style={styles.markersGrid}>
-                  {availableMarkers.map((marker) => {
-                    const isActive = activeMarkers.has(marker.id);
-                    const isFailed = failedMarkers.has(marker.id);
-                    const hasValidData = markerData.has(marker.id);
-                    
-                    return (
-                      <button
-                        key={marker.id}
-                        onClick={() => toggleMarker(marker.id)}
-                        disabled={markersLoading}
-                        title={isFailed ? `${marker.name} (Failed to load)` : marker.name}
-                        style={{
-                          ...styles.markerButton,
-                          ...(isActive && hasValidData ? styles.markerButtonActive : {}),
-                          ...(isFailed ? styles.markerButtonError : {}),
-                          ...(markersLoading ? styles.markerButtonLoading : {}),
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!markersLoading && !isActive && !isFailed) {
-                            e.currentTarget.style.backgroundColor = '#f3f4f6';
-                            e.currentTarget.style.borderColor = '#9ca3af';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!markersLoading && !isActive && !isFailed) {
-                            e.currentTarget.style.backgroundColor = '#ffffff';
-                            e.currentTarget.style.borderColor = '#d1d5db';
-                          }
-                        }}
-                      >
-                        {marker.id}
-                        {isFailed && <span style={{ marginLeft: '0.25rem' }}>⚠️</span>}
-                        {isActive && hasValidData && <span style={{ marginLeft: '0.25rem' }}>✓</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-                {availableMarkers.length === 0 && (
-                  <div style={{ fontSize: '0.9rem', color: '#6b7280', textAlign: 'center', padding: '1rem' }}>
-                    No technical analysis markers available
-                  </div>
-                )}
-                {failedMarkers.size > 0 && (
-                  <div style={styles.markersInfo}>
-                    ⚠️ Some markers failed to load or contain invalid data. Try again or check console for details.
-                  </div>
-                )}
-                {activeMarkers.size > 0 && (
-                  <div style={styles.markersInfo}>
-                    💡 Tip: Click active markers again to remove them from the chart.
-                  </div>
-                )}
               </div>
             </div>
           ) : (
