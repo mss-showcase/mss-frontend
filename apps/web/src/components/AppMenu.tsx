@@ -31,10 +31,11 @@ const AppMenu = () => {
           <>
             {user.isAdmin && <li><Link to="/admin" onClick={() => setOpen(false)}>Admin</Link></li>}
             <li><Link to="/profile" onClick={() => setOpen(false)}>My Profile</Link></li>
-            <li><Link to="/logout" onClick={() => setOpen(false)}>Logout</Link></li>
           </>
         ) : (
-          <li><Link to="/login" onClick={() => setOpen(false)}>Login</Link></li>
+          <>
+          
+          </>
         )}
       </ul>
     </nav>
