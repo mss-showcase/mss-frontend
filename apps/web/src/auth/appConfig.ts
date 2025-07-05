@@ -1,21 +1,20 @@
-let config: any = null;
+import React from 'react';
+import { ConfigContext } from '../main';
 
-export async function loadAppConfig() {
-  if (!config) {
-    const response = await fetch('/config.json');
-    config = await response.json();
-  }
+export function useAppConfig() {
+  const config = React.useContext(ConfigContext);
+  if (!config) throw new Error('ConfigContext not found!');
   return config;
 }
 
 export function getCognitoUserPoolId() {
-  return config?.COGNITO_USER_POOL_ID;
+  return React.useContext(ConfigContext)?.COGNITO_USER_POOL_ID;
 }
 
 export function getCognitoClientId() {
-  return config?.COGNITO_CLIENT_ID;
+  return React.useContext(ConfigContext)?.COGNITO_CLIENT_ID;
 }
 
 export function getGoogleClientId() {
-  return config?.GOOGLE_CLIENT_ID;
+  return React.useContext(ConfigContext)?.GOOGLE_CLIENT_ID;
 }

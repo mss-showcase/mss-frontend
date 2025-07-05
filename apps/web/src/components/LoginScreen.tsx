@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUserLoading, setUserProfile, setUserError } from '@mss-frontend/store/userSlice';
-import { getUserPool } from '../auth/cognitoUserPool';
+import { useUserPool } from '../auth/cognitoUserPool';
 import { CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
 import { GoogleLogin } from '@react-oauth/google';
 import type { RootState } from '@mss-frontend/store';
@@ -12,11 +12,11 @@ const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const userPool = useUserPool();
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     dispatch(setUserLoading(true));
     try {
-      const userPool = await getUserPool();
       const user = new CognitoUser({ Username: email, Pool: userPool });
       const authDetails = new AuthenticationDetails({ Username: email, Password: password });
       user.authenticateUser(authDetails, {

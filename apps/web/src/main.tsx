@@ -8,13 +8,17 @@ import './theme/theme.css';
 import * as buffer from 'buffer';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
+// Config context for app-wide config access
+export const ConfigContext = React.createContext<any>(null);
+
 // Polyfill Buffer for amazon-cognito-identity-js
 import('buffer').then(buffer => {
   window.Buffer = buffer.Buffer;
 });
 
+
 function ConfiguredApp() {
-  const [clientId, setClientId] = React.useState<string | null>(null);
+  const [config, setConfig] = React.useState<any>(null);
   const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -24,23 +28,27 @@ function ConfiguredApp() {
         return res.json();
       })
       .then(cfg => {
-        if (!cfg.GOOGLE_CLIENT_ID) throw new Error('Missing GOOGLE_CLIENT_ID in config.json');
-        setClientId(cfg.GOOGLE_CLIENT_ID);
+        if (!cfg.GOOGLE_CLIENT_ID || !cfg.COGNITO_USER_POOL_ID || !cfg.COGNITO_CLIENT_ID) {
+          throw new Error('Missing required config values in config.json');
+        }
+        setConfig(cfg);
       })
       .catch(e => setError(e.message));
   }, []);
 
   if (error) return <div style={{ color: '#ef4444', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: 16, margin: 32, textAlign: 'center' }}>Config error: {error}</div>;
-  if (!clientId) return <div style={{ color: '#888', padding: 32, textAlign: 'center' }}>Loading configuration...</div>;
+  if (!config) return <div style={{ color: '#888', padding: 32, textAlign: 'center' }}>Loading configuration...</div>;
 
   return (
-    <Provider store={store}>
-      <BrowserRouter>
-        <GoogleOAuthProvider clientId={clientId}>
-          <App />
-        </GoogleOAuthProvider>
-      </BrowserRouter>
-    </Provider>
+    <ConfigContext.Provider value={config}>
+      <Provider store={store}>
+        <BrowserRouter>
+          <GoogleOAuthProvider clientId={config.GOOGLE_CLIENT_ID}>
+            <App />
+          </GoogleOAuthProvider>
+        </BrowserRouter>
+      </Provider>
+    </ConfigContext.Provider>
   );
 }
 

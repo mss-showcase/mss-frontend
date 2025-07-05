@@ -1,15 +1,13 @@
+
+import React from 'react';
 import { CognitoUserPool } from 'amazon-cognito-identity-js';
-import { loadAppConfig, getCognitoUserPoolId, getCognitoClientId } from './appConfig';
+import { useAppConfig } from './appConfig';
 
-let userPool: CognitoUserPool | null = null;
 
-export async function getUserPool() {
-  if (!userPool) {
-    await loadAppConfig();
-    userPool = new CognitoUserPool({
-      UserPoolId: getCognitoUserPoolId(),
-      ClientId: getCognitoClientId(),
-    });
-  }
-  return userPool;
+export function useUserPool() {
+  const config = useAppConfig();
+  return React.useMemo(() => new CognitoUserPool({
+    UserPoolId: config.COGNITO_USER_POOL_ID,
+    ClientId: config.COGNITO_CLIENT_ID,
+  }), [config.COGNITO_USER_POOL_ID, config.COGNITO_CLIENT_ID]);
 }

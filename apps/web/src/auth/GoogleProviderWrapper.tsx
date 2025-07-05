@@ -1,18 +1,9 @@
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import React from 'react';
-
-import { useEffect, useState } from 'react';
-import { loadAppConfig, getGoogleClientId } from './appConfig';
+import { useAppConfig } from './appConfig';
 
 export const GoogleProviderWrapper = ({ children }: { children: React.ReactNode }) => {
-  const [clientId, setClientId] = useState<string | null>(null);
-
-  useEffect(() => {
-    loadAppConfig().then(() => {
-      setClientId(getGoogleClientId());
-    });
-  }, []);
-
-  if (!clientId) return null;
-  return <GoogleOAuthProvider clientId={clientId}>{children}</GoogleOAuthProvider>;
+  const config = useAppConfig();
+  if (!config?.GOOGLE_CLIENT_ID) return null;
+  return <GoogleOAuthProvider clientId={config.GOOGLE_CLIENT_ID}>{children}</GoogleOAuthProvider>;
 };
