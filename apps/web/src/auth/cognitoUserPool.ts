@@ -1,11 +1,15 @@
 import { CognitoUserPool } from 'amazon-cognito-identity-js';
+import { loadAppConfig, getCognitoUserPoolId, getCognitoClientId } from './appConfig';
 
+let userPool: CognitoUserPool | null = null;
 
-const poolData = {
-  UserPoolId: (import.meta as any).env.VITE_COGNITO_USER_POOL_ID,
-  ClientId: (import.meta as any).env.VITE_COGNITO_CLIENT_ID,
-};
-
-const userPool = new CognitoUserPool(poolData);
-
-export default userPool;
+export async function getUserPool() {
+  if (!userPool) {
+    await loadAppConfig();
+    userPool = new CognitoUserPool({
+      UserPoolId: getCognitoUserPoolId(),
+      ClientId: getCognitoClientId(),
+    });
+  }
+  return userPool;
+}

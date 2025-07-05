@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUserLoading, setUserProfile, setUserError } from '@mss-frontend/store/userSlice';
-import userPool from '../auth/cognitoUserPool';
+import { getUserPool } from '../auth/cognitoUserPool';
 import { CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
 import { GoogleLogin } from '@react-oauth/google';
 import type { RootState } from '@mss-frontend/store';
@@ -12,27 +12,33 @@ const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     dispatch(setUserLoading(true));
-    const user = new CognitoUser({ Username: email, Pool: userPool });
-    const authDetails = new AuthenticationDetails({ Username: email, Password: password });
-    user.authenticateUser(authDetails, {
-      onSuccess: (result) => {
-        dispatch(setUserProfile({
-          id: email,
-          name: email,
-          email,
-          isAdmin: false, // You may want to fetch this from /user/me
-          token: result.getIdToken().getJwtToken(),
-        }));
-        dispatch(setUserLoading(false));
-      },
-      onFailure: (err) => {
-        dispatch(setUserError(err.message || 'Login failed'));
-        dispatch(setUserLoading(false));
-      },
-    });
+    try {
+      const userPool = await getUserPool();
+      const user = new CognitoUser({ Username: email, Pool: userPool });
+      const authDetails = new AuthenticationDetails({ Username: email, Password: password });
+      user.authenticateUser(authDetails, {
+        onSuccess: (result) => {
+          dispatch(setUserProfile({
+            id: email,
+            name: email,
+            email,
+            isAdmin: false, // You may want to fetch this from /user/me
+            token: result.getIdToken().getJwtToken(),
+          }));
+          dispatch(setUserLoading(false));
+        },
+        onFailure: (err) => {
+          dispatch(setUserError(err.message || 'Login failed'));
+          dispatch(setUserLoading(false));
+        },
+      });
+    } catch (err: any) {
+      dispatch(setUserError(err.message || 'Login failed'));
+      dispatch(setUserLoading(false));
+    }
   };
 
   const handleGoogleSuccess = (credentialResponse: any) => {
