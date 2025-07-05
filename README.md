@@ -40,6 +40,7 @@ pnpm --filter @mss-frontend/web build
 ```
 This runs the build script defined in [apps/web/package.json](apps/web/package.json), which uses Vite.
 
+
 ### Local web development
 
 Please install the Vite plugin to your VS Code (optional).
@@ -51,3 +52,18 @@ pnpm --filter @mss-frontend/web dev
 ```
 
 The webapp will be available at http://localhost:5173
+
+## Configuration: config.json
+
+Before running or deploying the frontend, you must define the following public IDs in `apps/web/public/config.json`:
+
+```
+{
+  "LOCAL_GATEWAY_URL": "<your-backend-url>",
+  "COGNITO_USER_POOL_ID": "<your-cognito-user-pool-id>",
+  "COGNITO_CLIENT_ID": "<your-cognito-app-client-id>",
+  "GOOGLE_CLIENT_ID": "<your-google-oauth-client-id>"
+}
+```
+
+**Note:** Do NOT put any secrets or private keys in this file. Only public IDs are safe to expose in the frontend.

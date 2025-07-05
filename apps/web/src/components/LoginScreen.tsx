@@ -54,15 +54,16 @@ const LoginScreen = () => {
   };
 
   return (
-    <div className="login-screen">
-      <h2>Login</h2>
-      <form onSubmit={handleLogin}>
+    <div className="login-screen welcome" style={{ maxWidth: 400, margin: '2rem auto', padding: '2rem', borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.07)', background: '#fff' }}>
+      <h2 style={{ textAlign: 'center', color: '#2c3e50', fontWeight: 300, marginBottom: 24 }}>Login</h2>
+      <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
+          style={{ padding: '0.75rem 1rem', borderRadius: 8, border: '1.5px solid #e5e7eb', fontSize: 16 }}
         />
         <input
           type="password"
@@ -70,12 +71,17 @@ const LoginScreen = () => {
           value={password}
           onChange={e => setPassword(e.target.value)}
           required
+          style={{ padding: '0.75rem 1rem', borderRadius: 8, border: '1.5px solid #e5e7eb', fontSize: 16 }}
         />
-        <button type="submit" disabled={loading}>Login</button>
+        <button className="button" type="submit" disabled={loading} style={{ marginTop: 8 }}>
+          {loading ? 'Logging in...' : 'Login'}
+        </button>
       </form>
-      <div style={{ margin: '1rem 0' }}>or</div>
-      <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => dispatch(setUserError('Google login failed'))} />
-      {error && <div className="error-message">{error}</div>}
+      <div style={{ margin: '1.5rem 0', textAlign: 'center', color: '#888' }}>or</div>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => dispatch(setUserError('Google login failed'))} />
+      </div>
+      {error && <div className="error-message" style={{ color: '#ef4444', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: 8, marginTop: 16, textAlign: 'center' }}>{error}</div>}
     </div>
   );
 };

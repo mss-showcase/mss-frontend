@@ -34,27 +34,31 @@ const ProfileScreen = () => {
     }
   };
 
-  if (!profile) return <div>Please log in to view your profile.</div>;
+  if (!profile) return <div className="welcome" style={{ maxWidth: 400, margin: '2rem auto', padding: '2rem', borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.07)', background: '#fff', textAlign: 'center' }}>Please log in to view your profile.</div>;
 
   return (
-    <div className="profile-screen">
-      <h2>My Profile</h2>
-      <form onSubmit={handleUpdate}>
+    <div className="profile-screen welcome" style={{ maxWidth: 400, margin: '2rem auto', padding: '2rem', borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.07)', background: '#fff' }}>
+      <h2 style={{ textAlign: 'center', color: '#2c3e50', fontWeight: 300, marginBottom: 24 }}>My Profile</h2>
+      <form onSubmit={handleUpdate} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <input
           type="text"
           value={name}
           onChange={e => setName(e.target.value)}
           placeholder="Name"
+          style={{ padding: '0.75rem 1rem', borderRadius: 8, border: '1.5px solid #e5e7eb', fontSize: 16 }}
         />
         <input
           type="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
           placeholder="Email"
+          style={{ padding: '0.75rem 1rem', borderRadius: 8, border: '1.5px solid #e5e7eb', fontSize: 16 }}
         />
-        <button type="submit" disabled={loading}>Update</button>
+        <button className="button" type="submit" disabled={loading} style={{ marginTop: 8 }}>
+          {loading ? 'Updating...' : 'Update'}
+        </button>
       </form>
-      {error && <div className="error-message">{error}</div>}
+      {error && <div className="error-message" style={{ color: '#ef4444', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: 8, marginTop: 16, textAlign: 'center' }}>{error}</div>}
     </div>
   );
 };
