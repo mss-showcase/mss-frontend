@@ -5,12 +5,12 @@ import StockDetails from './StockDetails';
 import { RSSFeedReader } from './RSSFeedReader';
 import WeatherFeedReader from './WeatherFeedReader';
 import WhatToBuy from './WhatToBuy';
-
-
 import LoginScreen from './LoginScreen';
 import LogoutScreen from './LogoutScreen';
 import ProfileScreen from './ProfileScreen';
 import AdminDashboard from './AdminDashboard';
+import CallbackRedirect from './CallbackRedirect';
+import LogoutRedirect from './LogoutRedirect';
 
 const Navigation = () => (
   <Routes>
@@ -25,6 +25,8 @@ const Navigation = () => (
     <Route path="/logout" element={<LogoutScreen />} />
     <Route path="/profile" element={<ProfileScreen />} />
     <Route path="/admin" element={<AdminDashboard />} />
+    <Route path="/callback" element={<CallbackRedirect />} />
+    <Route path="/logout/callback" element={<LogoutRedirect />} />
   </Routes>
 );
 
