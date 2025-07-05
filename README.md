@@ -7,7 +7,7 @@ The project uses Vite and Redux.
 
 You can try this webapp in AWS **until approximately 2026.06.01**, or until AWS starts charging for hosting—whichever comes first.
 
-http://mss-webhosting-bucket.s3-website.eu-north-1.amazonaws.com/
+https://dgjqblpal7nk2.cloudfront.net/
 
 ## Required pnpm version
 
