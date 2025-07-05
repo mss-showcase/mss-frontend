@@ -12,11 +12,14 @@ const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const userPool = useUserPool();
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     dispatch(setUserLoading(true));
     try {
+      const userPool = useUserPool();
+      // Debug log to verify config values
+      // @ts-ignore
+      console.log('CognitoUserPool config:', userPool?.userPoolId, userPool?.clientId);
       const user = new CognitoUser({ Username: email, Pool: userPool });
       const authDetails = new AuthenticationDetails({ Username: email, Password: password });
       user.authenticateUser(authDetails, {
