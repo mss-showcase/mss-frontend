@@ -47,8 +47,23 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
+
       - name: Upload (sync) frontend to shared S3 bucket
         run: aws s3 sync apps/web/dist s3://$WEBHOSTING_BUCKET/ --delete --region $AWS_REGION
+
+      - name: Set cache headers for static assets
+        run: |
+          aws s3 cp s3://$WEBHOSTING_BUCKET/ s3://$WEBHOSTING_BUCKET/ \
+            --recursive \
+            --exclude "*" --include "*.js" --include "*.css" --include "*.png" --include "*.jpg" --include "*.svg" \
+            --metadata-directive REPLACE \
+            --cache-control "public, max-age=31536000, immutable" \
+            --region $AWS_REGION
+
+          aws s3 cp s3://$WEBHOSTING_BUCKET/index.html s3://$WEBHOSTING_BUCKET/index.html \
+            --metadata-directive REPLACE \
+            --cache-control "no-cache, must-revalidate" \
+            --region $AWS_REGION
 
       - name: Download CloudFront Distribution ID from S3 (if exists)
         run: |
@@ -57,7 +72,7 @@ jobs:
             export DISTRIBUTION_ID=$(cat CLOUDFRONT_DISTRIBUTION_ID.txt | tr -d '\n')
             echo "DISTRIBUTION_ID=$DISTRIBUTION_ID"
             echo "DISTRIBUTION_ID=$DISTRIBUTION_ID" >> $GITHUB_ENV
-            aws cloudfront create-invalidation --distribution-id ${DISTRIBUTION_ID} --paths '/*'
+            aws cloudfront create-invalidation --distribution-id ${DISTRIBUTION_ID} --paths '/index.html'
           else
             echo "No CLOUDFRONT_DISTRIBUTION_ID.txt found in S3 bucket $SHARED_BUILD_DATA_BUCKET. Skipping CloudFront cache invalidation."
           fi
