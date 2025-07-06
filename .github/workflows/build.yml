@@ -13,6 +13,7 @@ permissions:
 env:
   AWS_REGION: ${{ vars.AWS_REGION }}
   WEBHOSTING_BUCKET: ${{ vars.WEBHOSTING_BUCKET }}
+  SHARED_BUILD_DATA_BUCKET: ${{ vars.SHARED_BUILD_DATA_BUCKET }}
 
 jobs:
   build-web:
@@ -48,3 +49,15 @@ jobs:
 
       - name: Upload (sync) frontend to shared S3 bucket
         run: aws s3 sync apps/web/dist s3://$WEBHOSTING_BUCKET/ --delete --region $AWS_REGION
+
+      - name: Download CloudFront Distribution ID from S3 (if exists)
+        run: |
+          aws s3 cp s3://$SHARED_BUILD_DATA_BUCKET/CLOUDFRONT_DISTRIBUTION_ID.txt CLOUDFRONT_DISTRIBUTION_ID.txt --region $AWS_REGION || true
+          if [ -f CLOUDFRONT_DISTRIBUTION_ID.txt ]; then
+            export DISTRIBUTION_ID=$(cat CLOUDFRONT_DISTRIBUTION_ID.txt | tr -d '\n')
+            echo "DISTRIBUTION_ID=$DISTRIBUTION_ID"
+            echo "DISTRIBUTION_ID=$DISTRIBUTION_ID" >> $GITHUB_ENV
+            aws cloudfront create-invalidation --distribution-id ${DISTRIBUTION_ID} --paths '/*'
+          else
+            echo "No CLOUDFRONT_DISTRIBUTION_ID.txt found in S3 bucket $SHARED_BUILD_DATA_BUCKET. Skipping CloudFront cache invalidation."
+          fi
