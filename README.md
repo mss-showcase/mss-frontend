@@ -7,7 +7,15 @@ The project uses Vite and Redux.
 
 You can try this webapp in AWS **until approximately 2026.06.01**, or until AWS starts charging for hosting—whichever comes first.
 
-https://dgjqblpal7nk2.cloudfront.net/
+S3 static web bucket hosting (normal auth only):
+
+http://mss-webhosting-bucket.s3.eu-north-1.amazonaws.com/index.html
+
+
+Cloudfront (normal + google auth): 
+
+https://dgjqblpal7nk2.cloudfront.net/index.html
+
 
 ## Required pnpm version
 
