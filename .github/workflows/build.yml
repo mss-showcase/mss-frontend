@@ -39,7 +39,9 @@ jobs:
         run: pnpm install
 
       - name: Build Web
-        run: pnpm --filter @mss-frontend/web build
+        run: |
+          cp apps/web/.env.production apps/web/.env
+          NODE_ENV=production pnpm --filter @mss-frontend/web build
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
