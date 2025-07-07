@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUserLoading, setUserProfile, setUserError } from '@mss-frontend/store/userSlice';
 import { useUserPool } from '../auth/cognitoUserPool';
+import { isAdminFromToken } from '../auth/auth.js';
 import { CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
 import { GoogleLogin } from '@react-oauth/google';
 import type { RootState } from '@mss-frontend/store';
@@ -27,7 +28,23 @@ const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showGoogle, setShowGoogle] = useState(false);
+  // Hide OAuth logins if referer protocol is http (not https)
+  const [oauthAllowed, setOauthAllowed] = useState(true);
+  React.useEffect(() => {
+    try {
+      const ref = document.referrer || window.location.href;
+      const url = new URL(ref);
+      if (url.protocol === 'http:') {
+        setOauthAllowed(false);
+      }
+    } catch (e) {
+      // fallback: allow oauth
+      setOauthAllowed(true);
+    }
+  }, []);
   const userPool = useUserPool();
+
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,12 +58,21 @@ const LoginScreen = () => {
       user.authenticateUser(authDetails, {
         onSuccess: (result) => {
           console.log('Cognito login success:', result);
+          const idToken = result.getIdToken().getJwtToken();
+          // Defensive: check if token is a JWT
+          if (typeof idToken !== 'string' || idToken.split('.').length !== 3) {
+            console.error('Invalid JWT token received:', idToken);
+            dispatch(setUserError('Login failed: Invalid token received.'));
+            dispatch(setUserLoading(false));
+            return;
+          }
+          const isAdmin = isAdminFromToken(idToken);
           dispatch(setUserProfile({
             id: email,
             name: email,
             email: email,
-            isAdmin: false, // You may want to fetch this from /user/me
-            token: result.getIdToken().getJwtToken(),
+            isAdmin: isAdmin,
+            token: idToken,
           }));
           dispatch(setUserLoading(false));
         },
@@ -110,14 +136,16 @@ const LoginScreen = () => {
               {loading ? 'Logging in...' : 'Login'}
             </button>
           </form>
-          <div style={{ margin: '1.5rem 0', textAlign: 'center', color: '#888' }}>or</div>
-          <button className="button" style={{ width: '100%' }} onClick={() => setShowGoogle(true)}>
-            Login with Google
-          </button>
+          {oauthAllowed && <>
+            <div style={{ margin: '1.5rem 0', textAlign: 'center', color: '#888' }}>or</div>
+            <button className="button" style={{ width: '100%' }} onClick={() => setShowGoogle(true)}>
+              Login with Google
+            </button>
+          </>}
         </>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-          <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => dispatch(setUserError('Google login failed'))} />
+          {oauthAllowed && <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => dispatch(setUserError('Google login failed'))} />}
           <button className="button" style={{ width: '100%' }} onClick={() => setShowGoogle(false)}>
             Back to Email Login
           </button>

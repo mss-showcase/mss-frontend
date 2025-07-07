@@ -61,8 +61,9 @@ const HeaderUserMenu = () => {
           minWidth: 180,
           zIndex: 1000,
         }}>
-          <div style={{ padding: 12, borderBottom: '1px solid #eee', fontWeight: 500 }}>
-            {profile.name || profile.email}
+          <div style={{ padding: 12, borderBottom: '1px solid #eee', fontWeight: 500, color: '#1d3557', fontSize: 15, letterSpacing: 0.2 }}>
+            {profile.name || <span style={{ color: '#1d3557', fontWeight: 600 }}>{profile.email}</span>}
+            {!profile.name && <span style={{ color: '#1d3557', fontWeight: 600 }}>{profile.email}</span>}
           </div>
           <Link to="/profile" style={{ padding: 12, color: '#007bff', fontWeight: 500, fontSize: 16, display: 'flex', alignItems: 'center' }} onClick={() => setMenuOpen(false)}>
             <ProfileIcon /> My Profile
