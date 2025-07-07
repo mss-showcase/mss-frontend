@@ -28,9 +28,9 @@ function parseRSS(xml: string): FeedItem[] {
 
 const styles = {
   container: {
-    maxWidth: '1200px',
+    maxWidth: '66vw',
+    minWidth: 320,
     margin: '0 auto',
-    padding: '2rem',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   } as React.CSSProperties,
   
@@ -43,7 +43,7 @@ const styles = {
     fontSize: '2.5rem',
     fontWeight: '300',
     color: '#2c3e50',
-    margin: '0 0 0.5rem 0',
+    margin: '0 0 1.5rem 0',
   } as React.CSSProperties,
   
   subtitle: {
@@ -55,7 +55,6 @@ const styles = {
   controlsCard: {
     backgroundColor: '#ffffff',
     borderRadius: '12px',
-    padding: '2rem',
     marginBottom: '2rem',
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1)',
     border: '1px solid #e1e8ed',
@@ -63,12 +62,13 @@ const styles = {
   
   inputGroup: {
     display: 'flex',
-    flexDirection: 'column' as const,
+    flexDirection: 'column',
     gap: '0.5rem',
-    marginBottom: '1.5rem',
+    margin: '1.5rem',
   } as React.CSSProperties,
   
   label: {
+    margin: '1.5rem',
     fontSize: '0.9rem',
     fontWeight: '600',
     color: '#374151',
@@ -77,6 +77,7 @@ const styles = {
   } as React.CSSProperties,
   
   select: {
+    margin: '1.5rem',
     padding: '0.75rem 1rem',
     fontSize: '1rem',
     borderRadius: '8px',
@@ -90,7 +91,6 @@ const styles = {
   contentSection: {
     backgroundColor: '#ffffff',
     borderRadius: '12px',
-    padding: '2rem',
     marginBottom: '2rem',
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1)',
     border: '1px solid #e1e8ed',
@@ -100,7 +100,7 @@ const styles = {
     fontSize: '1.5rem',
     fontWeight: '600',
     color: '#1e293b',
-    marginBottom: '1rem',
+    margin: '1.5rem',
     borderBottom: '2px solid #e2e8f0',
     paddingBottom: '0.5rem',
   } as React.CSSProperties,
@@ -127,7 +127,7 @@ const styles = {
     backgroundColor: '#f8fafc',
     borderRadius: '8px',
     padding: '1.5rem',
-    marginTop: '1rem',
+    margin: '1.5rem',
     border: '1px solid #e2e8f0',
   } as React.CSSProperties,
   
@@ -234,14 +234,15 @@ export const RSSFeedReader: React.FC = () => {
 
       {/* News Source Selection */}
       <div style={styles.controlsCard}>
+        <h2 style={styles.sectionTitle}>News Source</h2>
         <div style={styles.inputGroup}>
-          <label style={styles.label}>News Source</label>
           <select
             value={selectedFeed}
             onChange={e => setSelectedFeed(e.target.value)}
             style={{
               ...styles.select,
               borderColor: selectedFeed ? '#3b82f6' : '#e5e7eb',
+              maxWidth: 320,
             }}
             disabled={loading}
           >
@@ -296,7 +297,7 @@ export const RSSFeedReader: React.FC = () => {
       {!loading && !error && items.length > 0 && (
         <div style={styles.contentSection}>
           <h2 style={styles.sectionTitle}>Latest Articles</h2>
-          <div style={{ fontSize: '0.9rem', color: '#6b7280', marginBottom: '1.5rem' }}>
+          <div style={{ fontSize: '0.9rem', color: '#6b7280', margin: '1.5rem' }}>
             From {selectedFeedLabel}
           </div>
           

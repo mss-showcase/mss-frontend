@@ -196,18 +196,18 @@ const LoginScreen = () => {
   };
 
   return (
-    <div className="login-screen welcome" style={{ maxWidth: 400, margin: '2rem auto', padding: '2rem', borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.07)', background: '#fff' }}>
-      <h2 style={{ textAlign: 'center', color: '#2c3e50', fontWeight: 300, marginBottom: 24 }}>Login</h2>
+    <div className="login-screen ergonomic-card">
+      <h2 className="ergonomic-title" style={{ marginBottom: 24 }}>Login</h2>
       {!showGoogle ? (
         <>
-          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <form onSubmit={handleLogin} className="ergonomic-form">
             <input
               type="email"
               placeholder="Email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
-              style={{ padding: '0.75rem 1rem', borderRadius: 8, border: '1.5px solid #e5e7eb', fontSize: 16 }}
+              className="ergonomic-input"
             />
             <input
               type="password"
@@ -215,28 +215,28 @@ const LoginScreen = () => {
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
-              style={{ padding: '0.75rem 1rem', borderRadius: 8, border: '1.5px solid #e5e7eb', fontSize: 16 }}
+              className="ergonomic-input"
             />
-            <button className="button" type="submit" disabled={loading} style={{ marginTop: 8 }}>
+            <button className="button ergonomic-btn" type="submit" disabled={loading}>
               {loading ? 'Logging in...' : 'Login'}
             </button>
           </form>
           {oauthAllowed && <>
-            <div style={{ margin: '1.5rem 0', textAlign: 'center', color: '#888' }}>or</div>
-            <button className="button" style={{ width: '100%' }} onClick={() => setShowGoogle(true)}>
+            <div className="ergonomic-or">or</div>
+            <button className="button ergonomic-btn" onClick={() => setShowGoogle(true)}>
               Login with Google
             </button>
           </>}
         </>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+        <div className="ergonomic-google-flex">
           {oauthAllowed && <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => dispatch(setUserError('Google login failed'))} />}
-          <button className="button" style={{ width: '100%' }} onClick={() => setShowGoogle(false)}>
+          <button className="button ergonomic-btn" onClick={() => setShowGoogle(false)}>
             Back to Email Login
           </button>
         </div>
       )}
-      {error && <div className="error-message" style={{ color: '#ef4444', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: 8, marginTop: 16, textAlign: 'center' }}>{error}</div>}
+      {error && <div className="error-message ergonomic-error">{error}</div>}
     </div>
   );
 };

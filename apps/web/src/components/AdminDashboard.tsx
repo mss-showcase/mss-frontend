@@ -51,7 +51,7 @@ const AdminDashboard = () => {
     });
   };
 
-  if (!user?.isAdmin) return <div className="welcome" style={{ maxWidth: 500, margin: '2rem auto', padding: '2rem', borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.07)', background: '#fff', textAlign: 'center' }}>Access denied. Admins only.</div>;
+  if (!user?.isAdmin) return <div className="welcome ergonomic-card" style={{ textAlign: 'center' }}>Access denied. Admins only.</div>;
 
   // Menu actions
   const handleSetAdmin = async (username: string, isAdmin: boolean) => {
@@ -87,54 +87,48 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="admin-dashboard welcome" style={{ maxWidth: 900, margin: '2rem auto', padding: '2rem', borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.07)', background: '#fff' }}>
-      <h2 style={{ textAlign: 'center', color: '#2c3e50', fontWeight: 300, marginBottom: 24 }}>Admin Dashboard</h2>
+    <div className="admin-dashboard ergonomic-card">
+      <h2 className="ergonomic-title" style={{ marginBottom: 24 }}>Admin Dashboard</h2>
       <nav className="admin-menu" style={{ marginBottom: 24 }}>
-        <ul style={{ display: 'flex', gap: 24, listStyle: 'none', padding: 0, margin: 0, justifyContent: 'center' }}>
-          <li style={{ fontWeight: 600, color: '#007bff' }}>Users</li>
+        <ul className="ergonomic-nav-list">
+          <li className="ergonomic-nav-item">Users</li>
         </ul>
       </nav>
       <section>
-        <h3 style={{ fontSize: '1.3rem', fontWeight: 600, color: '#1e293b', marginBottom: 16 }}>User List</h3>
-        {loading && <div style={{ color: '#6b7280', marginBottom: 12 }}>Loading users...</div>}
-        {error && <div className="error-message" style={{ color: '#ef4444', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: 8, marginBottom: 16, textAlign: 'center' }}>{error}</div>}
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+        <h3 className="ergonomic-section-title">User List</h3>
+        {loading && <div className="ergonomic-loading">Loading users...</div>}
+        {error && <div className="error-message ergonomic-error">{error}</div>}
+        <div className="ergonomic-table-wrapper">
+          <table className="ergonomic-table">
             <thead>
-              <tr style={{ background: '#f3f4f6' }}>
-                <th style={{ padding: 12, borderBottom: '1.5px solid #e5e7eb', textAlign: 'left' }}>
-                  <input type="checkbox" checked={allSelected} onChange={toggleAll} />
-                </th>
-                <th style={{ padding: 12, borderBottom: '1.5px solid #e5e7eb', textAlign: 'left' }}>ID</th>
-                <th style={{ padding: 12, borderBottom: '1.5px solid #e5e7eb', textAlign: 'left' }}>Name</th>
-                <th style={{ padding: 12, borderBottom: '1.5px solid #e5e7eb', textAlign: 'left' }}>Email</th>
-                <th style={{ padding: 12, borderBottom: '1.5px solid #e5e7eb', textAlign: 'left' }}>Admin</th>
-                <th style={{ padding: 12, borderBottom: '1.5px solid #e5e7eb', textAlign: 'left' }}>Actions</th>
+              <tr>
+                <th><input type="checkbox" checked={allSelected} onChange={toggleAll} /></th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Admin</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {users.map((u) => (
-                <tr key={u.id} style={{ borderBottom: '1px solid #f1f1f1' }}>
-                  <td style={{ padding: 10 }}>
-                    <input type="checkbox" checked={selected.includes(u.id)} onChange={() => toggleOne(u.id)} />
-                  </td>
-                  <td style={{ padding: 10 }}>{u.id}</td>
-                  <td style={{ padding: 10 }}>{u.name}</td>
-                  <td style={{ padding: 10 }}>{u.email}</td>
-                  <td style={{ padding: 10 }}>{u.isAdmin ? 'Yes' : 'No'}</td>
-                  <td style={{ padding: 10 }}>
-                    <div style={{ display: 'flex', gap: 8 }}>
+                <tr key={u.id}>
+                  <td><input type="checkbox" checked={selected.includes(u.id)} onChange={() => toggleOne(u.id)} /></td>
+                  <td>{u.id}</td>
+                  <td>{u.name}</td>
+                  <td>{u.email}</td>
+                  <td>{u.isAdmin ? 'Yes' : 'No'}</td>
+                  <td>
+                    <div className="ergonomic-btn-group">
                       <button
-                        className="button"
-                        style={{ fontSize: 13, padding: '4px 10px' }}
+                        className="button ergonomic-btn-sm"
                         disabled={u.isAdmin}
                         onClick={() => handleSetAdmin(u.name, true)}
                       >
                         Set Admin
                       </button>
                       <button
-                        className="button"
-                        style={{ fontSize: 13, padding: '4px 10px' }}
+                        className="button ergonomic-btn-sm"
                         disabled={!u.isAdmin || u.name === user.name}
                         onClick={() => handleSetAdmin(u.name, false)}
                       >
@@ -147,11 +141,11 @@ const AdminDashboard = () => {
             </tbody>
           </table>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 20 }}>
-          <button className="button" onClick={handlePrev} disabled={prevTokens.length === 0}>
+        <div className="ergonomic-table-controls">
+          <button className="button ergonomic-btn" onClick={handlePrev} disabled={prevTokens.length === 0}>
             Previous
           </button>
-          <button className="button" onClick={handleNext} disabled={!nextToken}>
+          <button className="button ergonomic-btn" onClick={handleNext} disabled={!nextToken}>
             Next
           </button>
         </div>

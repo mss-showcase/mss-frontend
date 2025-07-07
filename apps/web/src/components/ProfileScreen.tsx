@@ -34,11 +34,11 @@ const ProfileScreen = () => {
     }
   };
 
-  if (!profile) return <div className="welcome" style={{ maxWidth: 400, margin: '2rem auto', padding: '2rem', borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.07)', background: '#fff', textAlign: 'center' }}>Please log in to view your profile.</div>;
+  if (!profile) return <div className="contentSection" style={{ maxWidth: 400, margin: '2rem auto', textAlign: 'center' }}>Please log in to view your profile.</div>;
 
   return (
-    <div className="profile-screen welcome" style={{ maxWidth: 400, margin: '2rem auto', padding: '2rem', borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.07)', background: '#fff' }}>
-      <h2 style={{ textAlign: 'center', color: '#2c3e50', fontWeight: 300, marginBottom: 24 }}>My Profile</h2>
+    <div className="contentSection" style={{ maxWidth: 400, margin: '2rem auto' }}>
+      <h2 className="sectionTitle" style={{ textAlign: 'center', color: '#2c3e50', fontWeight: 300, marginBottom: 24 }}>My Profile</h2>
       <form onSubmit={handleUpdate} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <input
           type="text"

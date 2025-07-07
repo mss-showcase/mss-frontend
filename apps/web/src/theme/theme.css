@@ -1,3 +1,368 @@
+/* --- About Page Ergonomic/Card/Section Styles --- */
+.about-container {
+  max-width: 66vw;
+  min-width: 320px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  box-sizing: border-box;
+}
+
+.about-header {
+  margin-bottom: 2rem;
+  margin-top: 2.5rem;
+  text-align: center;
+}
+
+.about-title {
+  font-size: 2.5rem;
+  font-weight: 300;
+  color: #2c3e50;
+  margin: 0 0 0.5rem 0;
+}
+
+.about-subtitle {
+  font-size: 1.1rem;
+  color: #7f8c8d;
+  margin: 0;
+}
+
+.about-section {
+  background-color: #fff;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 2rem 2rem 1.5rem 2rem;
+  box-sizing: border-box;
+  border: 1px solid #e1e8ed;
+}
+
+.about-section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0.5rem;
+}
+
+.about-description {
+  line-height: 1.6;
+  color: #555;
+  margin: 0 0 1rem 0;
+}
+
+.about-features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.about-feature-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 1.25rem 1.25rem 1rem 1.25rem;
+  padding: 1rem;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.about-feature-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.about-feature-content {
+  flex: 1;
+}
+
+.about-feature-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+}
+
+.about-feature-description {
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.about-tech-stack {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+/* Removed stray block here */
+
+.about-tech-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #3b82f6;
+  margin: 0 0 0.75rem 0;
+  border-bottom: 2px solid #e0e7ff;
+  padding-bottom: 0.5rem;
+}
+
+.about-tech-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.about-tech-list-item {
+  padding: 0.25rem 0 0.25rem 0.75rem;
+  color: #555;
+  font-size: 0.9rem;
+  border-left: 3px solid #e0e7ff;
+  margin-bottom: 0.25rem;
+  transition: all 0.2s ease;
+}
+/* WhatToBuy ergonomic info/error and card styles */
+.what2buy-info-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 2rem;
+  color: #333;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin: 0 auto;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+.what2buy-progress {
+  width: 100%;
+  height: 12px;
+  background-color: #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.what2buy-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #2196f3, #1976d2);
+  border-radius: 6px;
+  transition: width 0.3s ease-in-out;
+}
+.what2buy-progress-text {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+.what2buy-info-italic {
+  font-size: 0.9rem;
+  color: #888;
+  font-style: italic;
+}
+.what2buy-empty {
+  padding: 2rem;
+  margin: 2rem auto;
+  max-width: 480px;
+  text-align: center;
+  color: #ef4444;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+}
+/* Ergonomic quick start label and error state for Welcome card */
+.quickstart-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  text-align: center;
+  width: 100%;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.quickstart-error {
+  color: #ef4444;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  margin: 0.5rem 0 0.7rem 0;
+  padding: 0.7rem 0.5rem;
+  text-align: center;
+}
+/* Ergonomic error state for cards and forms */
+.error-state, .errorState, .ergonomic-error {
+  color: #ef4444;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+/* Ergonomic, card, and section styles for unified UI */
+.ergonomic-card {
+  max-width: 420px;
+  min-width: 320px;
+  margin: 2.5rem auto;
+  padding: 2.5rem 2rem 2rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.09);
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.ergonomic-title {
+  text-align: center;
+  color: #2c3e50;
+  font-weight: 300;
+  margin-bottom: 24px;
+}
+
+.ergonomic-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.ergonomic-input {
+  padding: 1rem 1.2rem;
+  border-radius: 10px;
+  border: 1.5px solid #e5e7eb;
+  font-size: 1.08rem;
+  background: #f8fafc;
+  transition: border 0.2s;
+}
+.ergonomic-input:focus {
+  border: 1.5px solid #007bff;
+  background: #fff;
+}
+
+.ergonomic-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 0.9rem 0;
+  font-size: 1.08rem;
+  border-radius: 10px;
+}
+
+.ergonomic-or {
+  margin: 2rem 0 1.5rem 0;
+  text-align: center;
+  color: #888;
+  font-size: 1.02rem;
+}
+
+.ergonomic-google-flex {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.ergonomic-error {
+  color: #ef4444;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 8px;
+  margin-top: 16px;
+  text-align: center;
+}
+
+/* Admin Dashboard ergonomic styles */
+.admin-dashboard.ergonomic-card {
+  max-width: 900px;
+}
+.ergonomic-nav-list {
+  display: flex;
+  gap: 24px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  justify-content: center;
+}
+.ergonomic-nav-item {
+  font-weight: 600;
+  color: #007bff;
+}
+.ergonomic-section-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 16px;
+}
+.ergonomic-loading {
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+.ergonomic-table-wrapper {
+  overflow-x: auto;
+}
+.ergonomic-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.ergonomic-table th, .ergonomic-table td {
+  padding: 12px;
+  border-bottom: 1.5px solid #e5e7eb;
+  text-align: left;
+}
+.ergonomic-table th {
+  background: #f3f4f6;
+}
+.ergonomic-table tr:last-child td {
+  border-bottom: none;
+}
+.ergonomic-btn-group {
+  display: flex;
+  gap: 8px;
+}
+.ergonomic-btn-sm {
+  font-size: 13px;
+  padding: 4px 10px;
+  width: auto;
+}
+.ergonomic-table-controls {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+/* App container for consistent width */
+.app-container {
+  max-width: 66vw;
+  min-width: 320px;
+  margin: 0 auto;
+}
+
+/* Footer container for centering and width */
+.footer-inner {
+  max-width: 66vw;
+  min-width: 320px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.app-footer {
+  width: 100vw;
+  color: #6b7280;
+  font-size: 14px;
+  padding: 1rem 0;
+  margin-top: 32px;
+  background: #f8fafc;
+  position: static;
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -205,7 +570,7 @@ a:hover {
 .app-content {
   min-height: calc(100vh - 120px); /* Adjust for header/footer height */
   padding-bottom: 48px; /* Space for footer */
-  padding-top: 24px;
+  /* Removed padding-top for better alignment */
 }
 
 .welcome-container select {
@@ -593,4 +958,19 @@ a:hover {
   .article-title {
     font-size: 16px;
   }
+}
+
+.login-screen {
+  max-width: 420px;
+  min-width: 320px;
+  margin: 2.5rem auto;
+  padding: 2.5rem 2rem 2rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.09);
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  max-height: fit-content !important;
 }

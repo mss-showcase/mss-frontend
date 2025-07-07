@@ -1,26 +1,33 @@
+
 import AppMenu from './components/AppMenu';
 import Navigation from './components/Navigation';
 import HeaderUserMenu from './components/HeaderUserMenu';
+import Breadcrumbs from './components/Breadcrumbs';
 import './theme/theme.css';
 
 const App = () => {
   return (
     <>
-      <header className="app-header">
-        <div className="header-content" style={{ display: 'flex', alignItems: 'center', padding: '0 2rem' }}>
-          <HeaderUserMenu />
-          <h1 className="app-title" style={{ flex: 1, textAlign: 'center', margin: 0 }}>MSS Showcase WebApp</h1>
-          <div style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto' }}>
-          <AppMenu />  
+      <div className="app-container ergonomic-flex">
+        <header className="app-header ergonomic-section">
+          <div className="header-content ergonomic-flex header-menu-flex">
+            <HeaderUserMenu />
+            <h1 className="app-title ergonomic-title">MSS Showcase WebApp</h1>
+            <div className="header-menu-flex">
+              <AppMenu />
+            </div>
           </div>
-        </div>
-      </header>
-      <main className="app-content">
-        <Navigation />
-      </main>
-      <footer className="app-footer">
-        &copy; {new Date().getFullYear()} MSS Showcase. All rights reserved.
-      </footer>
+        </header>
+        <Breadcrumbs />
+        <main className="app-content ergonomic-main">
+          <Navigation />
+        </main>
+        <footer className="app-footer ergonomic-section">
+          <div className="footer-inner">
+            &copy; {new Date().getFullYear()} MSS Showcase. All rights reserved.
+          </div>
+        </footer>
+      </div>
     </>
   );
 };

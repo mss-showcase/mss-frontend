@@ -6,9 +6,9 @@ import { useNavigate } from 'react-router-dom';
 
 const styles = {
   container: {
-    maxWidth: '1200px',
+    maxWidth: '66vw',
+    minWidth: 320,
     margin: '0 auto',
-    padding: '2rem',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   } as React.CSSProperties,
   
@@ -35,7 +35,6 @@ const styles = {
   quickStartCard: {
     backgroundColor: '#ffffff',
     borderRadius: '12px',
-    padding: '2.5rem',
     marginBottom: '2rem',
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.1)',
     border: '1px solid #e1e8ed',
@@ -47,6 +46,8 @@ const styles = {
     fontWeight: '600',
     color: '#374151',
     marginBottom: '1rem',
+    borderBottom: '2px solid #e2e8f0',
+    paddingBottom: '0.5rem',
   } as React.CSSProperties,
 
   inputGroup: {
@@ -187,9 +188,9 @@ const Welcome = () => {
       <div style={styles.quickStartCard}>
         <h2 style={styles.quickStartTitle}>🚀 Quick Start</h2>
         <div style={styles.inputGroup}>
-          <label style={styles.label}>Choose a Stock to Analyze</label>
+          <label className="quickstart-label">Choose a Stock to Analyze</label>
           {loading && <div style={styles.loadingState}>Loading stocks...</div>}
-          {error && <div style={styles.errorState}>{error}</div>}
+          {error && <div className="quickstart-error">{error}</div>}
           {!loading && !error && (
             <select
               onChange={handleSelect}
@@ -197,11 +198,23 @@ const Welcome = () => {
               style={{
                 ...styles.select,
                 borderColor: selectedStock ? '#3b82f6' : '#e5e7eb',
+                marginTop: '0.5rem',
+                marginBottom: '0.5rem',
               }}
             >
               <option value="" disabled>Select a stock symbol</option>
               {items.map((item: string) => (
-                <option key={item} value={item}>{item}</option>
+                <option
+                  key={item}
+                  value={item}
+                  style={{
+                    fontWeight: item === selectedStock ? 600 : 400,
+                    color: item === selectedStock ? '#2563eb' : '#374151',
+                    backgroundColor: item === selectedStock ? '#f0f9ff' : '#fff',
+                  }}
+                >
+                  {item}
+                </option>
               ))}
             </select>
           )}

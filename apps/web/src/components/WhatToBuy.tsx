@@ -251,59 +251,22 @@ const WhatToBuy = () => {
         minHeight: '100vh',
         color: '#333'
       }}>
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.95)',
-          borderRadius: '16px',
-          padding: '2rem',
-          color: '#333',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-          maxWidth: '600px',
-          margin: '0 auto',
-          border: '1px solid rgba(0, 0, 0, 0.1)'
-        }}>
-          <h2 style={{ 
-            margin: '0 0 1.5rem 0',
-            fontSize: '1.5rem',
-            fontWeight: 'bold'
-          }}>
+        <div className="what2buy-info-card">
+          <h2 style={{ margin: '0 0 1.5rem 0', fontSize: '1.5rem', fontWeight: 'bold' }}>
             {stockLoading ? 'Loading stock list...' : isRefreshing ? 'Refreshing analysis...' : 'Analyzing stocks...'}
           </h2>
-          
           {fetchProgress.total > 0 && (
             <>
-              <div style={{
-                width: '100%',
-                height: '12px',
-                backgroundColor: '#e0e0e0',
-                borderRadius: '6px',
-                overflow: 'hidden',
-                marginBottom: '1rem'
-              }}>
-                <div style={{
-                  width: `${progressPercentage}%`,
-                  height: '100%',
-                  background: 'linear-gradient(90deg, #2196f3, #1976d2)',
-                  borderRadius: '6px',
-                  transition: 'width 0.3s ease-in-out'
-                }} />
+              <div className="what2buy-progress">
+                <div className="what2buy-progress-bar" style={{ width: `${progressPercentage}%` }} />
               </div>
-              
-              <div style={{
-                fontSize: '1rem',
-                color: '#666',
-                marginBottom: '1rem'
-              }}>
+              <div className="what2buy-progress-text">
                 Analyzing {fetchProgress.completed} of {fetchProgress.total} stocks ({progressPercentage}%)
               </div>
             </>
           )}
-          
           {analysisData.length > 0 && (
-            <div style={{
-              fontSize: '0.9rem',
-              color: '#888',
-              fontStyle: 'italic'
-            }}>
+            <div className="what2buy-info-italic">
               {analysisData.length} results loaded so far...
             </div>
           )}
@@ -314,7 +277,6 @@ const WhatToBuy = () => {
 
   return (
     <div style={{
-      padding: '2rem',
       background: 'linear-gradient(135deg, #e3f2fd 0%, #f5f5f5 100%)',
       minHeight: '100vh',
       color: '#333'
@@ -769,13 +731,9 @@ const WhatToBuy = () => {
         )}
 
         {analysisData.length === 0 && (
-          <div style={{
-            textAlign: 'center',
-            padding: '3rem',
-            color: '#666'
-          }}>
-            <h3>No analysis data available</h3>
-            <p>Please check that the analysis endpoints are working correctly.</p>
+          <div className="what2buy-empty">
+            <h3 style={{ margin: 0, fontWeight: 600 }}>No analysis data available</h3>
+            <p style={{ margin: 0, marginTop: '0.5rem' }}>Please check that the analysis endpoints are working correctly.</p>
           </div>
         )}
 
