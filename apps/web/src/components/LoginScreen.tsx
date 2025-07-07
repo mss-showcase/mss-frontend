@@ -1,3 +1,4 @@
+import Cookies from 'js-cookie';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUserLoading, setUserProfile, setUserError, logout } from '@mss-frontend/store/userSlice';
@@ -9,6 +10,23 @@ import type { RootState } from '@mss-frontend/store';
 import { useNavigate } from 'react-router-dom';
 
 const LoginScreen = () => {
+  // Restore session from cookie on mount
+  React.useEffect(() => {
+    const cookie = Cookies.get('mss_session');
+    if (cookie) {
+      try {
+        const userObj = JSON.parse(cookie);
+        // Defensive: check for required fields
+        if (userObj && userObj.id && userObj.token) {
+          dispatch(setUserProfile(userObj));
+        }
+      } catch (e) {
+        // Invalid cookie, ignore
+        Cookies.remove('mss_session');
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const dispatch = useDispatch();
   const { loading, error, profile } = useSelector((state: RootState) => state.user);
 
@@ -62,19 +80,29 @@ const LoginScreen = () => {
       if (!profile || !profile.id) return;
       // Only renew if user is logged in
       const cognitoUser = new CognitoUser({ Username: profile.id, Pool: userPool });
-      cognitoUser.getSession((err, session) => {
-        if (!err && session && session.isValid()) {
-          const idToken = session.getIdToken().getJwtToken();
-          const accessToken = session.getAccessToken().getJwtToken();
-          const isAdmin = isAdminFromToken(idToken);
-          dispatch(setUserProfile({
-            ...profile,
-            isAdmin,
-            token: accessToken,
-            idToken,
-          }));
-        }
-      });
+    interface CognitoSession {
+      isValid(): boolean;
+      getIdToken(): { getJwtToken(): string };
+      getAccessToken(): { getJwtToken(): string };
+    }
+
+    interface CognitoSessionError extends Error {
+      message: string;
+    }
+
+    cognitoUser.getSession((err: CognitoSessionError | null, session: CognitoSession | null) => {
+      if (!err && session && session.isValid()) {
+        const idToken: string = session.getIdToken().getJwtToken();
+        const accessToken: string = session.getAccessToken().getJwtToken();
+        const isAdmin: boolean = isAdminFromToken(idToken);
+        dispatch(setUserProfile({
+        ...profile,
+        isAdmin,
+        token: accessToken,
+        idToken,
+        }));
+      }
+    });
     }
 
     // Listen for user activity
@@ -121,14 +149,16 @@ const LoginScreen = () => {
             return;
           }
           const isAdmin = isAdminFromToken(idToken);
-          dispatch(setUserProfile({
+          const userObj = {
             id: email,
             name: email,
             email: email,
             isAdmin: isAdmin,
             token: accessToken, // Use access token for API calls
             idToken: idToken,   // Optionally keep idToken for profile/claims
-          }));
+          };
+          dispatch(setUserProfile(userObj));
+          Cookies.set('mss_session', JSON.stringify(userObj), { expires: 7, secure: true, sameSite: 'Lax' });
           dispatch(setUserLoading(false));
         },
         onFailure: (err) => {

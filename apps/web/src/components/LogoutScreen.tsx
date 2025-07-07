@@ -1,9 +1,11 @@
 
+
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { logout } from '@mss-frontend/store/userSlice';
 import { useNavigate } from 'react-router-dom';
 import { getCognitoClientId, getCognitoDomain } from '../auth/appConfig';
+import Cookies from 'js-cookie';
 
 
 const LogoutScreen = () => {
@@ -11,6 +13,8 @@ const LogoutScreen = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    // Remove session cookie
+    Cookies.remove('mss_session');
     dispatch(logout());
     const clientId = getCognitoClientId();
     const cognitoDomain = getCognitoDomain();
