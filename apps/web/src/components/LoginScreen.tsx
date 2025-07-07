@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setUserLoading, setUserProfile, setUserError } from '@mss-frontend/store/userSlice';
+import { setUserLoading, setUserProfile, setUserError, logout } from '@mss-frontend/store/userSlice';
 import { useUserPool } from '../auth/cognitoUserPool';
 import { isAdminFromToken } from '../auth/auth.js';
 import { CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
@@ -44,6 +44,59 @@ const LoginScreen = () => {
   }, []);
   const userPool = useUserPool();
 
+  // --- Access token renewal and inactivity auto-logout ---
+  React.useEffect(() => {
+    let renewInterval: NodeJS.Timeout | null = null;
+    let logoutTimeout: NodeJS.Timeout | null = null;
+    let lastActivity = Date.now();
+
+    function resetLogoutTimer() {
+      lastActivity = Date.now();
+      if (logoutTimeout) clearTimeout(logoutTimeout);
+      logoutTimeout = setTimeout(() => {
+        dispatch(logout());
+      }, 30 * 60 * 1000); // 30 minutes inactivity
+    }
+
+    function renewAccessToken() {
+      if (!profile || !profile.id) return;
+      // Only renew if user is logged in
+      const cognitoUser = new CognitoUser({ Username: profile.id, Pool: userPool });
+      cognitoUser.getSession((err, session) => {
+        if (!err && session && session.isValid()) {
+          const idToken = session.getIdToken().getJwtToken();
+          const accessToken = session.getAccessToken().getJwtToken();
+          const isAdmin = isAdminFromToken(idToken);
+          dispatch(setUserProfile({
+            ...profile,
+            isAdmin,
+            token: accessToken,
+            idToken,
+          }));
+        }
+      });
+    }
+
+    // Listen for user activity
+    const activityEvents = ['mousemove', 'keydown', 'mousedown', 'touchstart'];
+    activityEvents.forEach(evt => window.addEventListener(evt, resetLogoutTimer));
+    resetLogoutTimer();
+
+    // Set up periodic token renewal (every 5 min)
+    renewInterval = setInterval(() => {
+      if (Date.now() - lastActivity < 30000) {
+        renewAccessToken();
+      }
+    }, 5 * 60 * 1000);
+
+    return () => {
+      if (renewInterval) clearInterval(renewInterval);
+      if (logoutTimeout) clearTimeout(logoutTimeout);
+      activityEvents.forEach(evt => window.removeEventListener(evt, resetLogoutTimer));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile, userPool, dispatch]);
+
 
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -59,9 +112,10 @@ const LoginScreen = () => {
         onSuccess: (result) => {
           console.log('Cognito login success:', result);
           const idToken = result.getIdToken().getJwtToken();
+          const accessToken = result.getAccessToken().getJwtToken();
           // Defensive: check if token is a JWT
-          if (typeof idToken !== 'string' || idToken.split('.').length !== 3) {
-            console.error('Invalid JWT token received:', idToken);
+          if (typeof idToken !== 'string' || idToken.split('.').length !== 3 || typeof accessToken !== 'string' || accessToken.split('.').length !== 3) {
+            console.error('Invalid JWT token(s) received:', idToken, accessToken);
             dispatch(setUserError('Login failed: Invalid token received.'));
             dispatch(setUserLoading(false));
             return;
@@ -72,7 +126,8 @@ const LoginScreen = () => {
             name: email,
             email: email,
             isAdmin: isAdmin,
-            token: idToken,
+            token: accessToken, // Use access token for API calls
+            idToken: idToken,   // Optionally keep idToken for profile/claims
           }));
           dispatch(setUserLoading(false));
         },

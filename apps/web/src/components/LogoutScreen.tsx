@@ -1,13 +1,21 @@
+
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { logout } from '@mss-frontend/store/userSlice';
+import { useNavigate } from 'react-router-dom';
+import { getCognitoClientId, getCognitoDomain } from '../auth/appConfig';
+
 
 const LogoutScreen = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     dispatch(logout());
-    // Optionally, call /auth/logout endpoint here
+    const clientId = getCognitoClientId();
+    const cognitoDomain = getCognitoDomain();
+    const logoutRedirect = window.location.origin + '/index.html';
+    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutRedirect)}`;
   };
 
   return (

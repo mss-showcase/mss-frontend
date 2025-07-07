@@ -6,7 +6,8 @@ export interface UserProfile {
   name: string;
   email: string;
   isAdmin: boolean;
-  token: string | null;
+  token: string | null;      // access token for API calls
+  idToken?: string | null;   // id token for claims/profile (optional)
 }
 
 interface UserState {
